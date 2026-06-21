@@ -1,0 +1,321 @@
+:root {
+  --font-main: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  
+  /* Light theme */
+  --c-bg: #f0f2f5;
+  --c-surface: #ffffff;
+  --c-surface2: #f8f9fa;
+  --c-sidebar: #1e293b;
+  --c-border: #e2e8f0;
+  --c-text: #0f172a;
+  --c-text2: #64748b;
+  --c-accent: #2563eb;
+  --c-success: #16a34a;
+  --c-warn: #d97706;
+  --c-danger: #dc2626;
+  
+  /* Status colors */
+  --s-new-bg: #dbeafe;
+  --s-new-c: #1d4ed8;
+  --s-sch-bg: #dcfce7;
+  --s-sch-c: #15803d;
+  --s-arr-bg: #cffafe;
+  --s-arr-c: #0e7490;
+  --s-prg-bg: #fef9c3;
+  --s-prg-c: #a16207;
+  --s-acq-bg: #ede9fe;
+  --s-acq-c: #6d28d9;
+  --s-tor-bg: #ffedd5;
+  --s-tor-c: #c2410c;
+  --s-rep-bg: #dbeafe;
+  --s-rep-c: #1e40af;
+  --s-sgn-bg: #d1fae5;
+  --s-sgn-c: #065f46;
+  --s-iss-bg: #f1f5f9;
+  --s-iss-c: #475569;
+  --s-can-bg: #fee2e2;
+  --s-can-c: #b91c1c;
+}
+
+[data-theme='dark'] {
+  --c-bg: #0d1117;
+  --c-surface: #161b22;
+  --c-surface2: #21262d;
+  --c-sidebar: #010409;
+  --c-border: #30363d;
+  --c-text: #e6edf3;
+  --c-text2: #8b949e;
+  --c-accent: #58a6ff;
+  --c-success: #3fb950;
+  --c-warn: #d29922;
+  --c-danger: #f85149;
+  
+  --s-new-bg: #1e3a5f;
+  --s-new-c: #93c5fd;
+  --s-sch-bg: #14532d;
+  --s-sch-c: #86efac;
+  --s-arr-bg: #164e63;
+  --s-arr-c: #67e8f9;
+  --s-prg-bg: #451a03;
+  --s-prg-c: #fcd34d;
+  --s-acq-bg: #2e1065;
+  --s-acq-c: #c4b5fd;
+  --s-tor-bg: #431407;
+  --s-tor-c: #fdba74;
+  --s-rep-bg: #1e3a5f;
+  --s-rep-c: #93c5fd;
+  --s-sgn-bg: #052e16;
+  --s-sgn-c: #86efac;
+  --s-iss-bg: #1e2d3d;
+  --s-iss-c: #8b949e;
+  --s-can-bg: #450a0a;
+  --s-can-c: #fca5a5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: 13px;
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth theme transitions */
+html.switching *,
+html.switching *::before,
+html.switching *::after {
+  transition: background-color 0.35s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-text2);
+}
+
+/* Code / mono font */
+code, .mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* Ant Design overrides */
+.ant-layout {
+  background: var(--c-bg) !important;
+}
+
+.ant-layout-sider {
+  background: var(--c-sidebar) !important;
+}
+
+.ant-menu-dark {
+  background: var(--c-sidebar) !important;
+}
+
+.ant-card {
+  background: var(--c-surface) !important;
+  border-color: var(--c-border) !important;
+}
+
+.ant-table {
+  background: var(--c-surface) !important;
+}
+
+.ant-input, .ant-select-selector, .ant-picker {
+  background: var(--c-surface) !important;
+  border-color: var(--c-border) !important;
+  color: var(--c-text) !important;
+}
+
+.ant-form-item-label > label {
+  color: var(--c-text2) !important;
+}
+
+.ant-modal-content, .ant-modal-header {
+  background: var(--c-surface) !important;
+}
+
+.ant-drawer-content {
+  background: var(--c-surface) !important;
+}
+
+.ant-badge-status-text {
+  color: var(--c-text) !important;
+}
+
+/* Status badge styles */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-new { background: var(--s-new-bg); color: var(--s-new-c); }
+.status-scheduled { background: var(--s-sch-bg); color: var(--s-sch-c); }
+.status-arrived { background: var(--s-arr-bg); color: var(--s-arr-c); }
+.status-in_progress { background: var(--s-prg-bg); color: var(--s-prg-c); }
+.status-acquired { background: var(--s-acq-bg); color: var(--s-acq-c); }
+.status-to_report { background: var(--s-tor-bg); color: var(--s-tor-c); }
+.status-reporting { background: var(--s-rep-bg); color: var(--s-rep-c); }
+.status-signed { background: var(--s-sgn-bg); color: var(--s-sgn-c); }
+.status-issued { background: var(--s-iss-bg); color: var(--s-iss-c); }
+.status-cancelled { background: var(--s-can-bg); color: var(--s-can-c); }
+
+/* Urgent row highlighting */
+.urgent-row {
+  background-color: #fff7ed !important;
+}
+
+[data-theme='dark'] .urgent-row {
+  background-color: #2d1f0f !important;
+}
+
+.priority-urgent {
+  background: #d97706;
+  color: white;
+}
+
+.priority-routine {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+/* Custom card hover effect */
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.report-editor-grid {
+  display: grid;
+  grid-template-columns: 280px minmax(420px, 1fr) 360px;
+  gap: 12px;
+  align-items: start;
+}
+
+.report-editor-panel {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 0;
+}
+
+@media (max-width: 1280px) {
+  .report-editor-grid {
+    grid-template-columns: 260px minmax(420px, 1fr);
+  }
+
+  .report-editor-panel:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .report-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-editor-panel:last-child {
+    grid-column: auto;
+  }
+}
+
+/* Dark theme specific overrides */
+[data-theme='dark'] .ant-table {
+  color: var(--c-text);
+}
+
+[data-theme='dark'] .ant-empty-description {
+  color: var(--c-text2);
+}
+
+/* Fix internal input colors in Select and DatePicker for dark theme */
+[data-theme='dark'] .ant-select-selection-search-input,
+[data-theme='dark'] .ant-picker-input > input,
+[data-theme='dark'] .ant-select-selection-overflow-item .ant-select-selection-item-content {
+  color: var(--c-text) !important;
+}
+
+[data-theme='dark'] .ant-select-arrow,
+[data-theme='dark'] .ant-picker-suffix {
+  color: var(--c-text2) !important;
+}
+
+[data-theme='dark'] .ant-modal-content,
+[data-theme='dark'] .ant-modal-header {
+  background: var(--c-surface) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-btn {
+  color: var(--c-text2) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--c-accent) !important;
+}
+
+[data-theme='dark'] .priority-routine {
+  background: #21262d;
+  color: #8b949e;
+}
+
+[data-theme='dark'] .card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}

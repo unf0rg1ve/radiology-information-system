@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Направление {{ order.accession_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #222;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .org-name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .org-details {
+            font-size: 9pt;
+            color: #555;
+        }
+        .title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        th, td {
+            text-align: left;
+            vertical-align: top;
+            padding: 6px 4px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            width: 35%;
+            color: #444;
+            font-weight: normal;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 12pt;
+            border-bottom: 1px solid #999;
+        }
+        .notes {
+            white-space: pre-wrap;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+        .draft-watermark {
+            position: fixed;
+            top: 40%;
+            left: 15%;
+            transform: rotate(-30deg);
+            font-size: 60pt;
+            color: rgba(200, 0, 0, 0.15);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    {% if is_draft %}
+    <div class="draft-watermark">ЧЕРНОВИК</div>
+    {% endif %}
+
+    <div class="header">
+        <div class="org-name">{{ org.name or 'Диагностический центр' }}</div>
+        <div class="org-details">
+            {% if org.license %}{{ org.license }}<br>{% endif %}
+            {% if org.address %}{{ org.address }}<br>{% endif %}
+            {% if org.phone %}{{ org.phone }}{% endif %}
+        </div>
+    </div>
+
+    <div class="title">НАПРАВЛЕНИЕ НА ИССЛЕДОВАНИЕ</div>
+
+    <table>
+        <tr>
+            <th>Номер направления</th>
+            <td><strong>{{ order.accession_number or '—' }}</strong></td>
+        </tr>
+        <tr>
+            <th>Дата создания</th>
+            <td>{{ order.created_at or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Статус</th>
+            <td>{{ order.status | status_name or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Приоритет</th>
+            <td>{{ order.priority | priority_name or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Источник финансирования</th>
+            <td>{{ order.financing_type | financing_name or '—' }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Пациент</div>
+    <table>
+        <tr>
+            <th>ФИО</th>
+            <td>
+                {{ patient.last_name or '' }} {{ patient.first_name or '' }} {{ patient.middle_name or '' }}
+            </td>
+        </tr>
+        <tr>
+            <th>ИИН</th>
+            <td>{{ patient.iin or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Дата рождения</th>
+            <td>{{ patient.birth_date or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Пол</th>
+            <td>{{ patient.gender | gender_name or '—' }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Исследование</div>
+    <table>
+        <tr>
+            <th>Услуга</th>
+            <td>{{ service.name_ru or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Код услуги</th>
+            <td>{{ service.code_gombp or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Модальность</th>
+            <td>{{ service.modality or order.modality or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Область исследования</th>
+            <td>{{ order.body_part or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Контрастное усиление</th>
+            <td>{{ order.contrast_agent or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Клинические данные</th>
+            <td class="notes">{{ order.clinical_notes or '—' }}</td>
+        </tr>
+        {% if order.diagnosis_icd_code or order.diagnosis_icd_name %}
+        <tr>
+            <th>Предварительный диагноз</th>
+            <td>
+                {% if order.diagnosis_icd_code %}<strong>{{ order.diagnosis_icd_code }}</strong> — {% endif %}
+                {{ order.diagnosis_icd_name or '—' }}
+            </td>
+        </tr>
+        {% endif %}
+        {% if order.referring_physician_name %}
+        <tr>
+            <th>Направивший врач</th>
+            <td>{{ order.referring_physician_name }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <div class="footer">
+        Сформировано: {{ generated_at }}<br>
+        Документ является направлением на диагностическое исследование.
+    </div>
+</body>
+</html>

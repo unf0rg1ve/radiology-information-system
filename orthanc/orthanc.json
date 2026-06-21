@@ -1,0 +1,32 @@
+{
+  "Name": "RIS-Orthanc",
+  "DicomAet": "ORTHANC",
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": false,
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "IndexDirectory": "/var/lib/orthanc/db",
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  "StableAge": 60,
+  "MergeSeries": false,
+  "MergePatients": false,
+  "DicomModalitiesInDatabase": true,
+  "DicomModalities": {},
+  "DicomWebEnabled": true,
+  "WadoEnabled": true,
+  "StoneWebViewerEnabled": true,
+  "LuaEnabled": true,
+  "PythonEnabled": true,
+  "Plugins": [
+    "/usr/share/orthanc/plugins-available/libStoneWebViewer.so",
+    "/usr/share/orthanc/plugins-available/libOrthancDicomWeb.so",
+    "/usr/share/orthanc/plugins-available/libOrthancPython.so"
+  ],
+  "PythonScript": "/scripts/notify_ris.py",
+  "ExecuteLuaEnabled": true,
+  "HttpVerbose": false,
+  "DicomVerbose": false,
+  "Debug": false
+}

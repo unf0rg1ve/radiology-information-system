@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RIS — Предметная область для студентов</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-l:#eff6ff;--blue-d:#1d4ed8;
+  --green:#16a34a;--green-l:#f0fdf4;
+  --purple:#7c3aed;--purple-l:#f5f3ff;
+  --orange:#d97706;--orange-l:#fffbeb;
+  --red:#dc2626;--red-l:#fef2f2;
+  --teal:#0891b2;--teal-l:#ecfeff;
+  --gray:#6b7280;--gray-l:#f9fafb;
+  --text:#111827;--text2:#6b7280;--border:#e5e7eb;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);font-size:15px;color:var(--text);background:#f8fafc;line-height:1.6}
+a{color:var(--blue);text-decoration:none}
+
+/* NAV */
+.nav{background:#1e293b;color:#e2e8f0;padding:12px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.nav .logo{font-weight:700;font-size:16px;color:#fff}
+.nav a{color:#94a3b8;font-size:13px;padding:4px 10px;border-radius:4px;transition:.15s}
+.nav a:hover{background:#334155;color:#fff}
+.nav-sep{flex:1}
+
+/* SECTIONS */
+section{padding:60px 32px;max-width:1100px;margin:0 auto}
+h2{font-size:26px;font-weight:700;margin-bottom:8px}
+h3{font-size:18px;font-weight:600;margin-bottom:10px}
+.section-sub{color:var(--text2);font-size:16px;margin-bottom:36px}
+.tag{display:inline-block;background:var(--blue-l);color:var(--blue);border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-bottom:12px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e293b 0%,#1e3a5f 100%);color:#fff;padding:72px 32px;text-align:center}
+.hero h1{font-size:40px;font-weight:800;margin-bottom:16px;line-height:1.2}
+.hero p{font-size:18px;color:#94a3b8;max-width:600px;margin:0 auto 32px}
+.hero-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;font-size:13px;color:#cbd5e1}
+
+/* CONCEPT BOX */
+.concept{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:20px;display:flex;gap:20px;align-items:flex-start}
+.concept .icon{font-size:40px;flex-shrink:0;width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.concept h3{margin-bottom:6px}
+.concept p{color:var(--text2);font-size:14px;line-height:1.6}
+
+/* ROLE CARDS */
+.roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:8px}
+.role-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 24px;border-top:4px solid}
+.role-card h3{font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.role-card .daily{font-size:13px;color:var(--text2);margin-bottom:10px}
+.role-card ul{font-size:13px;color:var(--text2);padding-left:16px}
+.role-card ul li{margin-bottom:4px}
+.role-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
+
+/* FLOW STEPS */
+.flow{display:flex;gap:0;margin:32px 0;flex-wrap:wrap;justify-content:center}
+.flow-step{display:flex;flex-direction:column;align-items:center;position:relative;min-width:120px;flex:1;max-width:160px}
+.flow-step .num{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;margin-bottom:10px;position:relative;z-index:2}
+.flow-step .label{font-size:12px;text-align:center;color:var(--text2);font-weight:600;line-height:1.4}
+.flow-step .sublabel{font-size:11px;text-align:center;color:#9ca3af;margin-top:4px}
+.flow-arrow{display:flex;align-items:flex-start;padding-top:22px;color:#d1d5db;font-size:20px;flex-shrink:0}
+@media(max-width:600px){.flow-arrow{display:none}}
+
+/* STATUS FLOW */
+.statuses{display:flex;flex-direction:column;gap:0;margin:24px 0}
+.status-row{display:flex;align-items:stretch;gap:0}
+.status-box{flex:1;padding:12px 16px;border-radius:8px;margin:4px;position:relative}
+.status-box .s-name{font-weight:700;font-size:13px;margin-bottom:3px}
+.status-box .s-who{font-size:11px;opacity:.8}
+.status-box .s-what{font-size:12px;margin-top:4px;opacity:.9}
+.status-arrow{display:flex;align-items:center;justify-content:center;padding:0 4px;color:var(--gray);font-size:18px;flex-shrink:0}
+.status-side{display:flex;gap:6px;margin-left:12px;align-items:center}
+
+/* DICOM DIAGRAM */
+.dicom-flow{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;overflow-x:auto}
+.seq{display:flex;gap:0;align-items:stretch;min-width:600px}
+.seq-actor{display:flex;flex-direction:column;align-items:center;flex:1}
+.seq-actor .actor-box{background:#1e293b;color:#fff;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;text-align:center;white-space:nowrap}
+.seq-actor .actor-line{width:2px;background:#e5e7eb;flex:1;margin:0 auto;min-height:280px}
+.seq-msgs{flex:1;padding:0 12px;display:flex;flex-direction:column;gap:0;justify-content:flex-start;padding-top:40px}
+.msg{display:flex;align-items:center;gap:4px;margin-bottom:18px;font-size:12px}
+.msg .arrow{flex:1;height:2px;background:#2563eb;position:relative}
+.msg .arrow::after{content:'▶';position:absolute;right:-6px;top:-7px;color:var(--blue);font-size:12px}
+.msg .arrow.rev{background:#7c3aed}
+.msg .arrow.rev::after{content:'';right:auto;left:-6px}
+.msg .arrow.rev::before{content:'◀';position:absolute;left:-6px;top:-7px;color:var(--purple);font-size:12px}
+.msg .msg-label{background:var(--blue-l);color:var(--blue);padding:2px 8px;border-radius:4px;white-space:nowrap;font-weight:600;font-size:11px}
+.msg .msg-label.rev{background:var(--purple-l);color:var(--purple)}
+.msg-wrap{position:relative;margin-bottom:18px}
+.msg-note{font-size:11px;color:var(--text2);margin-top:2px;text-align:center}
+
+/* ARCH DIAGRAM */
+.arch{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;overflow-x:auto}
+.arch-inner{min-width:560px;position:relative}
+.arch-layer{border:2px solid;border-radius:10px;padding:16px 20px;margin-bottom:12px;position:relative}
+.arch-layer h4{font-size:13px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.arch-modules{display:flex;gap:8px;flex-wrap:wrap}
+.arch-mod{border-radius:6px;padding:4px 10px;font-size:12px;font-weight:500;border:1px solid}
+.arch-connect{text-align:center;color:var(--text2);font-size:12px;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:8px}
+.arch-connect::before,.arch-connect::after{content:'';flex:1;height:1px;background:var(--border)}
+.arch-side{display:flex;gap:12px}
+.arch-box{flex:1;border:2px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.arch-box .big{font-size:28px;margin-bottom:6px}
+.arch-box h4{font-size:12px;font-weight:700;margin-bottom:4px}
+.arch-box p{font-size:11px;color:var(--text2)}
+
+/* GLOSSARY */
+.glossary{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.gterm{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.gterm .term{font-weight:700;font-size:13px;color:var(--blue);margin-bottom:4px}
+.gterm .def{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* TIP BOXES */
+.tip{border-radius:10px;padding:16px 20px;margin:20px 0;display:flex;gap:12px;align-items:flex-start;font-size:14px}
+.tip .tip-ico{font-size:22px;flex-shrink:0;margin-top:-2px}
+.tip.info{background:var(--blue-l);border-left:4px solid var(--blue)}
+.tip.warn{background:var(--orange-l);border-left:4px solid var(--orange)}
+.tip.success{background:var(--green-l);border-left:4px solid var(--green)}
+
+/* CHECKLIST */
+.checklist{list-style:none;padding:0}
+.checklist li{padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.checklist li:last-child{border:none}
+.checklist li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);max-width:1100px;margin:0 auto}
+
+/* TOC */
+.toc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:40px;display:inline-block;min-width:280px}
+.toc h3{margin-bottom:12px;font-size:15px}
+.toc ol{padding-left:20px;font-size:14px}
+.toc li{margin-bottom:8px}
+.toc a{color:var(--blue)}
+
+/* UTILS */
+.mt24{margin-top:24px}
+.mt32{margin-top:32px}
+.mb16{margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="logo">RIS</span>
+  <a href="#what">Что строим</a>
+  <a href="#domain">Предметная область</a>
+  <a href="#roles">Роли</a>
+  <a href="#flow">Как проходит исследование</a>
+  <a href="#dicom">DICOM</a>
+  <a href="#lifecycle">Жизненный цикл</a>
+  <a href="#arch">Архитектура</a>
+  <a href="#glossary">Глоссарий</a>
+  <span class="nav-sep"></span>
+  <a href="../tz/wireframes.html">→ Wireframes</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="font-size:56px;margin-bottom:16px">🏥</div>
+  <h1>Радиологическая<br>информационная система</h1>
+  <p>Гайд для разработчиков: предметная область, бизнес-процессы и архитектура — простым языком</p>
+  <div class="hero-chips">
+    <span class="chip">🇰🇿 Казахстан</span>
+    <span class="chip">МРТ · КТ · Рентген · УЗИ</span>
+    <span class="chip">DICOM · HL7</span>
+    <span class="chip">FastAPI · React · PostgreSQL</span>
+  </div>
+</div>
+
+<section>
+  <div class="toc">
+    <h3>📋 Содержание</h3>
+    <ol>
+      <li><a href="#what">Что мы строим и зачем</a></li>
+      <li><a href="#domain">Как устроен диагностический центр</a></li>
+      <li><a href="#roles">Роли и что они делают</a></li>
+      <li><a href="#flow">Полный путь пациента</a></li>
+      <li><a href="#dicom">Что такое DICOM и зачем Orthanc</a></li>
+      <li><a href="#lifecycle">Жизненный цикл исследования</a></li>
+      <li><a href="#arch">Как устроена система (архитектура)</a></li>
+      <li><a href="#glossary">Глоссарий терминов</a></li>
+    </ol>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 1: WHAT -->
+<section id="what">
+  <div class="tag">ЗАЧЕМ ЭТО НУЖНО</div>
+  <h2>Что мы строим и зачем</h2>
+  <p class="section-sub">Если коротко: мы автоматизируем работу диагностического центра — от записи пациента до выдачи ему заключения.</p>
+
+  <div class="tip info">
+    <span class="tip-ico">💡</span>
+    <div><strong>Аналогия:</strong> представьте, что диагностический центр — это мастерская по ремонту автомобилей. Пациент — клиент. Направление — заявка на ремонт. КТ/МРТ-аппарат — диагностический прибор. Снимки — результаты диагностики. Заключение врача — акт выполненных работ. RIS — это CRM + ERP для этой мастерской.</div>
+  </div>
+
+  <div class="grid2 mt24">
+    <div class="concept">
+      <div class="icon" style="background:#fee2e2;font-size:28px">😰</div>
+      <div>
+        <h3>Без RIS (сейчас в небольших ДЦ)</h3>
+        <p>Регистратор записывает в тетрадь. Лаборант вручную вводит данные пациента в аппарат (ошибки!). Врач не знает, когда пришли снимки. Заключения ищут в папках. Статистику считают в Excel.</p>
+      </div>
+    </div>
+    <div class="concept">
+      <div class="icon" style="background:#d1fae5;font-size:28px">🚀</div>
+      <div>
+        <h3>С RIS (что мы строим)</h3>
+        <p>Аппарат сам скачивает список пациентов. Снимки автоматически попадают в систему. Врач открывает один экран — там и данные пациента, и снимки, и форма описания. Заключение — PDF одной кнопкой.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: DOMAIN -->
+<section id="domain">
+  <div class="tag">ПРЕДМЕТНАЯ ОБЛАСТЬ</div>
+  <h2>Как устроен диагностический центр</h2>
+  <p class="section-sub">Диагностический центр (ДЦ) — это медицинское учреждение, где проводят инструментальные исследования: делают снимки внутренних органов и описывают, что на них видно.</p>
+
+  <div class="concept">
+    <div class="icon" style="background:#dbeafe">🧲</div>
+    <div>
+      <h3>МРТ (Магнитно-резонансная томография)</h3>
+      <p>Аппарат использует магнитное поле и радиоволны. Хорошо показывает мягкие ткани: мозг, мышцы, суставы, органы брюшной полости. Не использует радиацию. Занимает 30–60 минут. Код в системе: <strong>MR</strong>.</p>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="icon" style="background:#fef9c3">☢️</div>
+    <div>
+      <h3>КТ (Компьютерная томография)</h3>
+      <p>Аппарат делает серию рентгеновских снимков под разными углами, компьютер строит 3D-изображение. Хорошо показывает кости, лёгкие, сосуды (с контрастом). Быстро: 5–20 минут. Код: <strong>CT</strong>.</p>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="icon" style="background:#d1fae5">📡</div>
+    <div>
+      <h3>Рентгенография (РГ)</h3>
+      <p>Классический рентген. Быстро (5 мин), дёшево, для лёгких, костей, позвоночника. Коды: <strong>CR</strong> (цифровой), <strong>DX</strong> (прямой цифровой).</p>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="icon" style="background:#f0e6ff">🔊</div>
+    <div>
+      <h3>УЗИ (Ультразвуковое исследование)</h3>
+      <p>Использует звуковые волны. Безопасно, без радиации. Хорошо для органов брюшной полости, щитовидки, сосудов, беременности. Код: <strong>US</strong>.</p>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="icon" style="background:#fce7f3">💊</div>
+    <div>
+      <h3>Контрастное вещество</h3>
+      <p>Специальный препарат, который вводят внутривенно перед некоторыми КТ/МРТ. Он "подсвечивает" сосуды и опухоли. Важно знать аллергии! В RIS это отдельное поле в направлении.</p>
+    </div>
+  </div>
+
+  <div class="tip warn">
+    <span class="tip-ico">⚠️</span>
+    <div><strong>Важно для разработчика:</strong> каждый тип аппарата — это отдельный <code>Device</code> с уникальным <code>AE Title</code> (идентификатором в DICOM-сети). Один КТ-аппарат = одна запись в таблице <code>devices</code>. ДЦ может иметь несколько КТ.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: ROLES -->
+<section id="roles">
+  <div class="tag">ПОЛЬЗОВАТЕЛИ СИСТЕМЫ</div>
+  <h2>Роли — кто что делает</h2>
+  <p class="section-sub">В RIS шесть ролей. У каждой — свой экран, свои права и свои задачи.</p>
+
+  <div class="roles">
+    <div class="role-card" style="border-color:#2563eb">
+      <h3>
+        <span style="font-size:22px">📋</span>
+        Регистратор
+        <span class="role-badge" style="background:#dbeafe;color:#1d4ed8">REGISTRAR</span>
+      </h3>
+      <p class="daily">Работает на ресепшене. Принимает пациентов, создаёт документы.</p>
+      <ul>
+        <li>Находит пациента в базе или создаёт нового</li>
+        <li>Создаёт направление (что исследовать, зачем)</li>
+        <li>Записывает пациента в расписание на конкретный аппарат</li>
+        <li>Отмечает явку пациента</li>
+        <li>Печатает направление</li>
+      </ul>
+    </div>
+
+    <div class="role-card" style="border-color:#0891b2">
+      <h3>
+        <span style="font-size:22px">🔬</span>
+        Рентгенолаборант
+        <span class="role-badge" style="background:#cffafe;color:#0e7490">TECHNOLOGIST</span>
+      </h3>
+      <p class="daily">Работает у аппарата. Проводит исследование.</p>
+      <ul>
+        <li>Видит список пациентов на своём аппарате (Worklist)</li>
+        <li>Отмечает: прибыл, начали, снимки сделаны</li>
+        <li>Контролирует качество снимков (QC)</li>
+        <li>Может попросить переснять при плохом качестве</li>
+      </ul>
+    </div>
+
+    <div class="role-card" style="border-color:#16a34a">
+      <h3>
+        <span style="font-size:22px">👨‍⚕️</span>
+        Врач-рентгенолог
+        <span class="role-badge" style="background:#d1fae5;color:#065f46">RADIOLOGIST</span>
+      </h3>
+      <p class="daily">Ключевая роль. Смотрит снимки и пишет медицинское заключение.</p>
+      <ul>
+        <li>Открывает список «к описанию»</li>
+        <li>Просматривает снимки во встроенном вьюере</li>
+        <li>Заполняет шаблон протокола (структурированные поля)</li>
+        <li>Пишет заключение и ставит диагноз (МКБ-10)</li>
+        <li>Подписывает и выдаёт заключение (PDF)</li>
+      </ul>
+    </div>
+
+    <div class="role-card" style="border-color:#7c3aed">
+      <h3>
+        <span style="font-size:22px">🗂️</span>
+        Заведующий отделением
+        <span class="role-badge" style="background:#ede9fe;color:#6d28d9">HEAD</span>
+      </h3>
+      <p class="daily">Руководит работой отделения. Контролирует качество и нагрузку.</p>
+      <ul>
+        <li>Видит всё: нагрузку, статусы, просроченные</li>
+        <li>Может переназначить описание другому врачу</li>
+        <li>Инициирует «второе мнение» по сложным случаям</li>
+        <li>Следит за временем выдачи заключений (TAT)</li>
+      </ul>
+    </div>
+
+    <div class="role-card" style="border-color:#d97706">
+      <h3>
+        <span style="font-size:22px">🩺</span>
+        Врач-направитель
+        <span class="role-badge" style="background:#fef9c3;color:#a16207">REFERRER</span>
+      </h3>
+      <p class="daily">Доктор из поликлиники, который направил пациента на исследование.</p>
+      <ul>
+        <li>Создаёт направления своим пациентам</li>
+        <li>Видит статус исследования (готово / в процессе)</li>
+        <li>Читает готовые заключения</li>
+        <li>Получает cito-уведомления при критических находках</li>
+        <li><strong>Видит только своих пациентов!</strong></li>
+      </ul>
+    </div>
+
+    <div class="role-card" style="border-color:#dc2626">
+      <h3>
+        <span style="font-size:22px">⚙️</span>
+        Администратор
+        <span class="role-badge" style="background:#fee2e2;color:#b91c1c">ADMIN</span>
+      </h3>
+      <p class="daily">Технический администратор системы. Настраивает всё.</p>
+      <ul>
+        <li>Создаёт пользователей и назначает роли</li>
+        <li>Ведёт справочники (аппараты, шаблоны, услуги)</li>
+        <li>Смотрит аудит-лог</li>
+        <li>Импортирует тарификатор МЗ РК</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tip info mt24">
+    <span class="tip-ico">🔐</span>
+    <div><strong>RBAC (Role-Based Access Control)</strong> — контроль доступа по ролям. В коде это middleware: <code>@require_roles(["RADIOLOGIST", "HEAD"])</code>. Если пользователь с ролью REGISTRAR попытается подписать заключение — получит 403 Forbidden.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 4: FLOW -->
+<section id="flow">
+  <div class="tag">БИЗНЕС-ПРОЦЕСС</div>
+  <h2>Полный путь пациента</h2>
+  <p class="section-sub">От прихода в ДЦ до получения заключения. Каждый шаг — конкретное действие конкретной роли.</p>
+
+  <!-- Main flow -->
+  <div class="flow">
+    <div class="flow-step">
+      <div class="num" style="background:#2563eb">1</div>
+      <div class="label">Поиск / создание<br>пациента</div>
+      <div class="sublabel">📋 Регистратор</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#0891b2">2</div>
+      <div class="label">Создание<br>направления</div>
+      <div class="sublabel">📋 Регистратор</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#7c3aed">3</div>
+      <div class="label">Запись в<br>расписание</div>
+      <div class="sublabel">📋 Регистратор</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#16a34a">4</div>
+      <div class="label">Проведение<br>исследования</div>
+      <div class="sublabel">🔬 Лаборант + Аппарат</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#d97706">5</div>
+      <div class="label">Контроль<br>качества (QC)</div>
+      <div class="sublabel">🔬 Лаборант</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#dc2626">6</div>
+      <div class="label">Описание<br>снимков</div>
+      <div class="sublabel">👨‍⚕️ Радиолог</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="num" style="background:#065f46">7</div>
+      <div class="label">Подпись и<br>выдача PDF</div>
+      <div class="sublabel">👨‍⚕️ Радиолог</div>
+    </div>
+  </div>
+
+  <!-- Detailed steps -->
+  <div style="margin-top:32px">
+
+    <div class="concept">
+      <div class="icon" style="background:#dbeafe;font-size:22px">1️⃣</div>
+      <div>
+        <h3>Шаг 1: Регистратор находит или создаёт пациента</h3>
+        <p>Пациент приходит на ресепшен. Регистратор вводит ИИН (12-значный номер, аналог ИНН в РФ). Если пациент уже есть в базе — открывается его карточка. Если нет — регистратор заполняет форму (ФИО, дата рождения, телефон, льготная категория). <strong>Важно:</strong> ИИН валидируется алгоритмом — нельзя ввести выдуманный номер.</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#cffafe;font-size:22px">2️⃣</div>
+      <div>
+        <h3>Шаг 2: Создание направления (Order)</h3>
+        <p>Регистратор создаёт «направление» — документ, описывающий что нужно сделать. Указывает: услугу из тарификатора МЗ РК, модальность (КТ/МРТ/РГ), тип финансирования (ГОБМП / ОСМС / платно), приоритет (плановый / срочный / CITO). Система генерирует <strong>Accession Number</strong> — уникальный номер типа <code>260613-00512</code>. Этот номер — ключ, связывающий всё: направление, MWL-запись в аппарате, DICOM-снимки и заключение.</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#ede9fe;font-size:22px">3️⃣</div>
+      <div>
+        <h3>Шаг 3: Запись в расписание</h3>
+        <p>Регистратор открывает календарь, выбирает аппарат (например МРТ-1), находит свободный слот и записывает. После записи RIS автоматически создаёт MWL-запись в Orthanc — аппарат теперь «знает», что придёт пациент Байжанова в 10:00.</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#d1fae5;font-size:22px">4️⃣</div>
+      <div>
+        <h3>Шаг 4: Проведение исследования (DICOM)</h3>
+        <p>Лаборант видит пациента в своём Worklist. Аппарат делает C-FIND запрос в Orthanc и получает данные пациента (имя, ИИН, Accession Number) — лаборант <strong>ничего не вводит вручную</strong>. После исследования аппарат отправляет снимки в Orthanc (C-STORE). Orthanc через webhook уведомляет RIS — снимки получены, статус меняется автоматически.</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#fef9c3;font-size:22px">5️⃣</div>
+      <div>
+        <h3>Шаг 5: Контроль качества (QC)</h3>
+        <p>Лаборант смотрит на снимки: нет ли артефактов, движения пациента, неверного положения. Если хорошо — нажимает [Принять]. Если плохо — [Переснять] с указанием причины. История попыток сохраняется. После принятия статус меняется на «К ОПИСАНИЮ».</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#fee2e2;font-size:22px">6️⃣</div>
+      <div>
+        <h3>Шаг 6: Врач описывает снимки</h3>
+        <p>Врач-рентгенолог открывает экран описания: слева — данные направления, в центре — вьюер Orthanc со снимками, справа — форма заключения. Система подгружает <strong>шаблон протокола</strong> — набор структурированных полей для конкретного исследования (МРТ мозга: серое вещество, белое вещество, желудочки...). Врач заполняет поля, пишет свободный текст описания и итоговое заключение.</p>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="icon" style="background:#d1fae5;font-size:22px">7️⃣</div>
+      <div>
+        <h3>Шаг 7: Подпись и выдача</h3>
+        <p>Врач нажимает [Подписать] — система вычисляет SHA-256 хэш заключения, фиксирует timestamp и ID врача. Документ становится <strong>неизменяемым</strong>. Затем [Выдать] — генерируется PDF с реквизитами по НПА РК. Если найдена критическая патология — врач ставит флаг «Критическая находка» и направляющий врач мгновенно получает уведомление (cito).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip success mt24">
+    <span class="tip-ico">✅</span>
+    <div><strong>Финальный тест MVP:</strong> всё вышеперечисленное должно работать end-to-end без единого ручного действия за пределами UI — от создания пациента до скачивания PDF.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 5: DICOM -->
+<section id="dicom">
+  <div class="tag">ТЕХНИЧЕСКИЙ ПРОТОКОЛ</div>
+  <h2>Что такое DICOM и зачем нужен Orthanc</h2>
+  <p class="section-sub">DICOM — это международный стандарт для хранения и передачи медицинских изображений. Как JPEG, но для рентгена, и с метаданными пациента внутри каждого файла.</p>
+
+  <div class="tip info">
+    <span class="tip-ico">💡</span>
+    <div><strong>Аналогия:</strong> DICOM — это как ZIP-архив, где внутри не только изображение, но и имя пациента, дата исследования, название аппарата, Accession Number и сотни других полей. Каждый снимок — это отдельный DICOM-файл. МРТ головного мозга может дать 300+ файлов.</div>
+  </div>
+
+  <div class="grid2 mt24 mb16">
+    <div class="concept">
+      <div class="icon" style="background:#dbeafe;font-size:24px">🏗️</div>
+      <div>
+        <h3>Orthanc</h3>
+        <p>Open-source DICOM-сервер. Принимает снимки от аппаратов, хранит их, позволяет их просматривать. В нашей системе Orthanc — отдельный Docker-контейнер. RIS общается с ним через REST API. Аппараты — через DICOM-протокол.</p>
+      </div>
+    </div>
+    <div class="concept">
+      <div class="icon" style="background:#f5f3ff;font-size:24px">👁️</div>
+      <div>
+        <h3>Stone Web Viewer</h3>
+        <p>Встроенный в Orthanc веб-вьюер снимков. В экране описания мы открываем его в <code>&lt;iframe&gt;</code> — врач видит снимки прямо в RIS, не переходя на другой сайт. Не разрабатываем свой вьюер — это годы работы.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt32">Как работает DICOM в нашей системе</h3>
+  <div class="dicom-flow mt24">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Последовательность взаимодействия при проведении одного исследования:</div>
+    <div class="seq">
+      <!-- Actors -->
+      <div class="seq-actor">
+        <div class="actor-box">📋<br>RIS<br>(наш бекенд)</div>
+        <div class="actor-line"></div>
+      </div>
+      <div style="flex:2;padding-top:40px">
+
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:600">① Регистратор создаёт запись в расписании</div>
+        <div class="msg">
+          <div class="arrow" style="background:#16a34a"></div>
+          <div class="msg-label" style="background:#d1fae5;color:#065f46">POST /mwl → создать worklist-запись</div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text2);margin:12px 0 8px;font-weight:600">② Утром лаборант включает аппарат — он запрашивает список</div>
+        <div class="msg">
+          <div class="arrow rev" style="background:#7c3aed"></div>
+          <div class="msg-label rev">DICOM C-FIND «дай список пациентов»</div>
+        </div>
+        <div class="msg">
+          <div class="arrow" style="background:#7c3aed"></div>
+          <div class="msg-label" style="background:#ede9fe;color:#7c3aed">MWL-ответ: имя, ИИН, AN, время, модальность</div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text2);margin:12px 0 8px;font-weight:600">③ Исследование проведено — аппарат отправляет снимки</div>
+        <div class="msg">
+          <div class="arrow rev" style="background:#dc2626"></div>
+          <div class="msg-label rev">DICOM C-STORE «вот 312 DICOM-файлов»</div>
+        </div>
+        <div class="msg">
+          <div class="arrow" style="background:#d97706"></div>
+          <div class="msg-label" style="background:#fef9c3;color:#a16207">Webhook: POST /api/webhook/orthanc/stored</div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text2);margin:12px 0 8px;font-weight:600">④ Врач открывает описание — смотрит снимки</div>
+        <div class="msg">
+          <div class="arrow" style="background:#0891b2"></div>
+          <div class="msg-label" style="background:#cffafe;color:#0e7490">GET /studies/{uid} → ссылка на вьюер</div>
+        </div>
+      </div>
+      <div class="seq-actor">
+        <div class="actor-box">🏗️<br>Orthanc<br>(DICOM-сервер)</div>
+        <div class="actor-line"></div>
+      </div>
+      <div style="flex:2;padding-top:40px">
+        <div class="msg" style="visibility:hidden"><div class="arrow"></div><div class="msg-label"></div></div>
+        <div style="margin-bottom:32px"></div>
+        <div class="msg">
+          <div class="arrow rev" style="background:#7c3aed"></div>
+          <div class="msg-label rev">DICOM C-FIND (порт 4242)</div>
+        </div>
+        <div class="msg">
+          <div class="arrow" style="background:#7c3aed"></div>
+          <div class="msg-label" style="background:#ede9fe;color:#7c3aed">Список исследований</div>
+        </div>
+        <div style="margin:12px 0 8px"></div>
+        <div class="msg">
+          <div class="arrow" style="background:#dc2626"></div>
+          <div class="msg-label" style="background:#fee2e2;color:#b91c1c">DICOM C-STORE (порт 4242)</div>
+        </div>
+      </div>
+      <div class="seq-actor">
+        <div class="actor-box">🩻<br>Аппарат<br>(КТ / МРТ)</div>
+        <div class="actor-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip warn mt24">
+    <span class="tip-ico">⚠️</span>
+    <div><strong>AE Title</strong> — это DICOM-аналог «имени» устройства в сети. Каждый аппарат имеет уникальный AE Title (например: <code>CT1_SOMATOM</code>). RIS должен знать AE Title аппарата, чтобы публиковать для него правильную MWL-запись. Хранится в таблице <code>devices.ae_title</code>.</div>
+  </div>
+
+  <div class="tip info">
+    <span class="tip-ico">💡</span>
+    <div><strong>Accession Number</strong> — сквозной идентификатор. RIS генерирует его при создании направления (<code>260613-00512</code>), кладёт в MWL-запись, аппарат вписывает его в каждый снимок. Когда Orthanc присылает webhook — мы ищем заказ по этому номеру. Это «нить», связывающая всё в системе.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 6: LIFECYCLE -->
+<section id="lifecycle">
+  <div class="tag">МАШИНА СОСТОЯНИЙ</div>
+  <h2>Жизненный цикл исследования</h2>
+  <p class="section-sub">Каждое исследование проходит через 10 возможных статусов. Переходы между ними строго ограничены — это машина состояний в коде.</p>
+
+  <div class="arch" style="overflow-x:auto">
+    <div style="min-width:700px">
+
+    <!-- Main chain -->
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:8px;flex-wrap:nowrap">
+      <div style="background:#dbeafe;border:2px solid #2563eb;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#1d4ed8">НОВОЕ</div>
+        <div style="font-size:10px;color:#3b82f6;margin-top:2px">📋 Регистратор</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">Направление создано</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">→</div>
+      <div style="background:#dcfce7;border:2px solid #16a34a;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#15803d">ЗАПЛАНИРОВАНО</div>
+        <div style="font-size:10px;color:#16a34a;margin-top:2px">📋 Регистратор</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">MWL → Orthanc ✓</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">→</div>
+      <div style="background:#cffafe;border:2px solid #0891b2;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#0e7490">ПРИБЫЛ</div>
+        <div style="font-size:10px;color:#0891b2;margin-top:2px">📋 Регистратор</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">Пациент пришёл</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">→</div>
+      <div style="background:#fef9c3;border:2px solid #d97706;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#a16207">В РАБОТЕ</div>
+        <div style="font-size:10px;color:#d97706;margin-top:2px">🔬 Лаборант</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">Съёмка идёт</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">→</div>
+      <div style="background:#ede9fe;border:2px solid #7c3aed;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:90px">
+        <div style="font-weight:700;font-size:12px;color:#6d28d9">СНИМКИ ПОЛУЧЕНЫ</div>
+        <div style="font-size:10px;color:#7c3aed;margin-top:2px">🤖 Автоматически</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">Webhook от Orthanc</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:8px;flex-wrap:nowrap">
+      <div style="flex:1;min-width:80px"></div>
+      <div style="padding:0 4px;flex-shrink:0;width:28px"></div>
+      <div style="flex:1;min-width:80px"></div>
+      <div style="padding:0 4px;flex-shrink:0;width:28px"></div>
+      <div style="flex:1;min-width:80px"></div>
+      <div style="padding:0 4px;flex-shrink:0;width:28px"></div>
+      <div style="flex:1;min-width:80px;text-align:center;color:#6b7280;font-size:20px">↕️</div>
+      <div style="padding:0 4px;flex-shrink:0;width:28px"></div>
+      <div style="flex:1;min-width:90px;text-align:center;font-size:11px;color:#7c3aed">↓ QC ОК</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0;flex-direction:row-reverse;flex-wrap:nowrap">
+      <div style="background:#f0fdf4;border:2px solid #15803d;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#065f46">ВЫДАНО</div>
+        <div style="font-size:10px;color:#16a34a;margin-top:2px">👨‍⚕️ Радиолог</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">PDF готов</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">←</div>
+      <div style="background:#d1fae5;border:2px solid #065f46;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#065f46">ПОДПИСАНО</div>
+        <div style="font-size:10px;color:#16a34a;margin-top:2px">👨‍⚕️ Радиолог</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">SHA-256 зафиксирован</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">←</div>
+      <div style="background:#dbeafe;border:2px solid #1e40af;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#1e40af">ОПИСЫВАЕТСЯ</div>
+        <div style="font-size:10px;color:#2563eb;margin-top:2px">👨‍⚕️ Радиолог</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">Черновик</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">←</div>
+      <div style="background:#ffedd5;border:2px solid #c2410c;border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-weight:700;font-size:12px;color:#c2410c">К ОПИСАНИЮ</div>
+        <div style="font-size:10px;color:#d97706;margin-top:2px">🤖 Система</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px">После QC</div>
+      </div>
+      <div style="color:#6b7280;padding:0 4px;font-size:18px;flex-shrink:0">←</div>
+      <div style="flex:1;min-width:90px"></div>
+    </div>
+
+    <!-- Special states -->
+    <div style="margin-top:20px;padding-top:16px;border-top:1px dashed #e5e7eb;display:flex;gap:10px;flex-wrap:wrap">
+      <div style="background:#fee2e2;border:1px solid #dc2626;border-radius:8px;padding:8px 14px;font-size:12px">
+        <span style="font-weight:700;color:#b91c1c">ОТМЕНЕНО</span>
+        <span style="color:#6b7280;margin-left:8px">← из любого статуса до В РАБОТЕ</span>
+      </div>
+      <div style="background:#f5f3ff;border:1px solid #7c3aed;border-radius:8px;padding:8px 14px;font-size:12px">
+        <span style="font-weight:700;color:#6d28d9">↺ Переснять</span>
+        <span style="color:#6b7280;margin-left:8px">СНИМКИ ПОЛУЧЕНЫ → В РАБОТЕ (QC fail)</span>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #d97706;border-radius:8px;padding:8px 14px;font-size:12px">
+        <span style="font-weight:700;color:#a16207">Второе мнение</span>
+        <span style="color:#6b7280;margin-left:8px">Из ПОДПИСАНО/ВЫДАНО → новый Report (оригинал не меняется)</span>
+      </div>
+    </div>
+
+    </div>
+  </div>
+
+  <div class="tip info mt24">
+    <span class="tip-ico">💡</span>
+    <div><strong>В коде:</strong> статусы — это enum. Переходы валидируются в service-слое. Попытка сделать <code>NEW → SIGNED</code> напрямую → <code>ValueError("Invalid transition")</code>. Каждый переход записывается в <code>audit_log</code> с timestamp — на них строятся метрики TAT.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 7: ARCH -->
+<section id="arch">
+  <div class="tag">АРХИТЕКТУРА</div>
+  <h2>Как устроена система</h2>
+  <p class="section-sub">Три независимых сервиса, запущенных через Docker Compose. Каждый делает своё дело и не лезет в зону ответственности другого.</p>
+
+  <div class="arch">
+    <div class="arch-inner">
+
+      <!-- Frontend -->
+      <div class="arch-layer" style="border-color:#2563eb;background:#eff6ff">
+        <h4 style="color:#1d4ed8">🌐 Фронтенд (React + TypeScript + Ant Design)</h4>
+        <div class="arch-modules">
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Страница входа</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Дашборд</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Пациенты</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Направления</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Расписание</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Worklist</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Описание (3 кол.)</span>
+          <span class="arch-mod" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Справочники</span>
+        </div>
+        <div style="font-size:12px;color:#3b82f6;margin-top:8px">Порт 3000 · Vite dev server → nginx в prod · Тёмная/светлая тема</div>
+      </div>
+
+      <div class="arch-connect">REST/JSON + WebSocket (порт 8000)</div>
+
+      <!-- Backend -->
+      <div class="arch-layer" style="border-color:#16a34a;background:#f0fdf4">
+        <h4 style="color:#15803d">⚙️ Бекенд (FastAPI + Python)</h4>
+        <div class="arch-modules">
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">auth / JWT / RBAC</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">patients</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">orders</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">schedule</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">worklist</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">reports</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">protocol_templates</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">refs (МКБ, тариф)</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">stats</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">webhook (Orthanc)</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">OrthancAdapter</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">SignatureProvider</span>
+          <span class="arch-mod" style="background:#dcfce7;border-color:#86efac;color:#15803d">audit_log</span>
+        </div>
+        <div style="font-size:12px;color:#16a34a;margin-top:8px">Порт 8000 · SQLAlchemy 2 · Alembic · /docs → Swagger UI</div>
+      </div>
+
+      <div class="arch-connect">SQL (порт 5432) · · · · · · · DICOMweb / REST (порт 8042)</div>
+
+      <div class="arch-side">
+        <!-- Database -->
+        <div class="arch-box" style="border-color:#7c3aed">
+          <div class="big">🗄️</div>
+          <h4 style="color:#7c3aed">PostgreSQL 16</h4>
+          <p>Все данные: пациенты, заказы, заключения, аудит. Порт 5432. Данные в Docker volume.</p>
+        </div>
+        <!-- Orthanc -->
+        <div class="arch-box" style="border-color:#0891b2">
+          <div class="big">🏗️</div>
+          <h4 style="color:#0891b2">Orthanc</h4>
+          <p>DICOM-сервер. MWL + C-STORE + DICOMweb. Stone Web Viewer. Порт 8042 (HTTP), 4242 (DICOM).</p>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
+        ↕️ DICOM C-FIND / C-STORE (порт 4242)
+      </div>
+
+      <div class="arch-box" style="border-color:#d97706;margin-top:8px">
+        <div style="font-size:24px">🩻</div>
+        <h4 style="color:#d97706">Медицинские аппараты (КТ, МРТ, РГ, УЗИ)</h4>
+        <p style="font-size:12px">Физические устройства в ДЦ. Общаются с Orthanc по протоколу DICOM. В RIS — только их AE Title и расписание.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 8: GLOSSARY -->
+<section id="glossary">
+  <div class="tag">ГЛОССАРИЙ</div>
+  <h2>Термины и сокращения</h2>
+  <p class="section-sub">Всё что вам встретится в коде, документации и при общении с врачами.</p>
+
+  <div class="glossary">
+    <div class="gterm"><div class="term">RIS</div><div class="def">Radiology Information System — система автоматизации радиологического отделения. Управляет процессом от регистрации до выдачи заключения.</div></div>
+    <div class="gterm"><div class="term">PACS</div><div class="def">Picture Archiving and Communication System — архив медицинских изображений. В нашем случае роль PACS выполняет Orthanc.</div></div>
+    <div class="gterm"><div class="term">DICOM</div><div class="def">Digital Imaging and Communications in Medicine — стандарт передачи и хранения медицинских изображений. Как JPEG, но с метаданными пациента и поддержкой сетевых команд.</div></div>
+    <div class="gterm"><div class="term">MWL (Modality Worklist)</div><div class="def">«Список заданий для аппарата». Аппарат делает C-FIND запрос и получает: кого снимать, когда, что именно, Accession Number. Избавляет лаборанта от ручного ввода.</div></div>
+    <div class="gterm"><div class="term">C-STORE</div><div class="def">DICOM-команда: «сохрани этот файл у себя». Аппарат делает C-STORE в Orthanc — снимки уходят на сервер.</div></div>
+    <div class="gterm"><div class="term">C-FIND</div><div class="def">DICOM-команда: «найди у себя что-то по критериям». Аппарат делает C-FIND чтобы получить MWL.</div></div>
+    <div class="gterm"><div class="term">AE Title</div><div class="def">Application Entity Title — уникальный идентификатор DICOM-устройства в сети. Как hostname, только для DICOM. Пример: CT1_SOMATOM. До 16 символов, латиница.</div></div>
+    <div class="gterm"><div class="term">Accession Number (AN)</div><div class="def">Уникальный номер заказа. Генерируется RIS, вшивается в MWL, аппарат вставляет в каждый снимок. Формат: YYMMDD-NNNNN. Связывает всё в системе.</div></div>
+    <div class="gterm"><div class="term">Study Instance UID</div><div class="def">Глобальный уникальный идентификатор исследования в DICOM. Формат: 1.2.840... (OID). Генерируется аппаратом. Нужен для открытия снимков в вьюере.</div></div>
+    <div class="gterm"><div class="term">ИИН</div><div class="def">Индивидуальный идентификационный номер — 12 цифр. Аналог ИНН в РФ. Первые 6 цифр = дата рождения. 7-я цифра = пол/век. Есть алгоритм проверки контрольной цифры.</div></div>
+    <div class="gterm"><div class="term">МКБ-10</div><div class="def">Международная классификация болезней 10-го пересмотра. Коды вида G35 (рассеянный склероз), J18.9 (пневмония). Обязательны в заключении.</div></div>
+    <div class="gterm"><div class="term">ГОБМП / ОСМС</div><div class="def">Типы государственного финансирования в Казахстане. ГОБМП — гарантированный объём бесплатной медпомощи. ОСМС — обязательное медстрахование. Аналог ОМС в РФ.</div></div>
+    <div class="gterm"><div class="term">Turnaround Time (TAT)</div><div class="def">Время от создания заказа до выдачи заключения. Ключевая бизнес-метрика ДЦ. В коде: <code>issued_at - created_at</code>. Норма — до 2-4 часов.</div></div>
+    <div class="gterm"><div class="term">Cito</div><div class="def">Латинское «срочно». Наивысший приоритет. Строки с cito подсвечиваются красным. При критической находке в заключении — автоматическое cito-уведомление направителю.</div></div>
+    <div class="gterm"><div class="term">QC (Quality Control)</div><div class="def">Контроль качества снимков лаборантом. После C-STORE лаборант проверяет: нет ли артефактов, движений, ошибок положения. Принять = идти дальше. Переснять = вернуть в В РАБОТЕ.</div></div>
+    <div class="gterm"><div class="term">ЭЦП</div><div class="def">Электронная цифровая подпись. В MVP — SHA-256 хэш содержимого + timestamp + ID врача (ЭЦП-ready). Полная ЭЦП через НУЦ РК подключается позже без изменения логики.</div></div>
+    <div class="gterm"><div class="term">НПА РК</div><div class="def">Нормативно-правовые акты Республики Казахстан. Приказы МЗ РК регулируют форму медицинских документов, тарификацию, требования к МИС.</div></div>
+    <div class="gterm"><div class="term">Orthanc</div><div class="def">Open-source DICOM-сервер. Принимает снимки, хранит, отдаёт. Расширяется Python/Lua плагинами. В нашем проекте — отдельный Docker-контейнер.</div></div>
+    <div class="gterm"><div class="term">Stone Web Viewer</div><div class="def">Веб-вьюер DICOM, встроенный в Orthanc. Открывается в iframe в экране описания. Врач видит снимки, не покидая RIS.</div></div>
+    <div class="gterm"><div class="term">Protocol Template (шаблон протокола)</div><div class="def">Набор структурированных полей для конкретного типа исследования. МРТ мозга: серое вещество, белое вещество, желудочки... Хранится как JSONB в PostgreSQL.</div></div>
+    <div class="gterm"><div class="term">RBAC</div><div class="def">Role-Based Access Control. В коде: декоратор <code>@require_roles</code>. REGISTRAR не может подписать заключение → 403 Forbidden.</div></div>
+    <div class="gterm"><div class="term">Тарификатор МЗ РК</div><div class="def">Справочник услуг с кодами и тарифами. Приказ МЗ РК № ҚР ДСМ-170/2020. Коды вида A06.20.010. Два набора тарифов: ГОБМП и ОСМС.</div></div>
+  </div>
+
+  <div class="tip success" style="margin-top:40px">
+    <span class="tip-ico">🎓</span>
+    <div>
+      <strong>Готовы начинать?</strong> Следующий шаг —
+      <a href="../tz/wireframes.html">открыть Wireframes</a> (все 13 экранов с тёмной/светлой темой) и
+      <a href="EPIC-MVP.md">прочитать EPIC-MVP.md</a> (задачи по спринтам с acceptance criteria и SQL-схемой).
+    </div>
+  </div>
+</section>
+
+<div style="background:#1e293b;color:#64748b;text-align:center;padding:24px;font-size:13px;margin-top:40px">
+  RIS MVP · Казахстан · 2026 · Документ создан с помощью Claude Code
+</div>
+
+</body>
+</html>

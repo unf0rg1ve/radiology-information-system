@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заключение {{ order.accession_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #222;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .org-name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .org-details {
+            font-size: 9pt;
+            color: #555;
+        }
+        .title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        th, td {
+            text-align: left;
+            vertical-align: top;
+            padding: 6px 4px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            width: 35%;
+            color: #444;
+            font-weight: normal;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 12pt;
+            border-bottom: 1px solid #999;
+        }
+        .text-block {
+            white-space: pre-wrap;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .hash {
+            font-family: monospace;
+            font-size: 8pt;
+            color: #666;
+            word-break: break-all;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+        .draft-watermark {
+            position: fixed;
+            top: 40%;
+            left: 15%;
+            transform: rotate(-30deg);
+            font-size: 60pt;
+            color: rgba(200, 0, 0, 0.15);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .critical-stamp {
+            position: fixed;
+            top: 30%;
+            left: 10%;
+            transform: rotate(-15deg);
+            font-size: 36pt;
+            color: rgba(200, 0, 0, 0.25);
+            font-weight: bold;
+            border: 4px solid rgba(200, 0, 0, 0.25);
+            padding: 10px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    {% if is_draft %}
+    <div class="draft-watermark">ЧЕРНОВИК</div>
+    {% endif %}
+    {% if is_critical %}
+    <div class="critical-stamp">КРИТИЧЕСКАЯ НАХОДКА</div>
+    {% endif %}
+
+    <div class="header">
+        <div class="org-name">{{ org.name or 'Диагностический центр' }}</div>
+        <div class="org-details">
+            {% if org.license %}{{ org.license }}<br>{% endif %}
+            {% if org.address %}{{ org.address }}<br>{% endif %}
+            {% if org.phone %}{{ org.phone }}{% endif %}
+        </div>
+    </div>
+
+    <div class="title">МЕДИЦИНСКОЕ ЗАКЛЮЧЕНИЕ</div>
+
+    <table>
+        <tr>
+            <th>Номер направления</th>
+            <td><strong>{{ order.accession_number or '—' }}</strong></td>
+        </tr>
+        <tr>
+            <th>Дата заключения</th>
+            <td>{{ report.signed_at or report.created_at or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Статус</th>
+            <td>{{ report.status | status_name or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Приоритет</th>
+            <td>{{ order.priority | priority_name or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Источник финансирования</th>
+            <td>{{ order.financing_type | financing_name or '—' }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Пациент</div>
+    <table>
+        <tr>
+            <th>ФИО</th>
+            <td>
+                {{ patient.last_name or '' }} {{ patient.first_name or '' }} {{ patient.middle_name or '' }}
+            </td>
+        </tr>
+        <tr>
+            <th>ИИН</th>
+            <td>{{ patient.iin or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Дата рождения</th>
+            <td>{{ patient.birth_date or '—' }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Исследование</div>
+    <table>
+        <tr>
+            <th>Услуга</th>
+            <td>{{ service.name_ru or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Код услуги</th>
+            <td>{{ service.code_gombp or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Модальность</th>
+            <td>{{ order.modality or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Область исследования</th>
+            <td>{{ order.body_part or '—' }}</td>
+        </tr>
+    </table>
+
+    {% if report.diagnosis_icd_codes and report.diagnosis_icd_codes|length > 0 %}
+    <div class="section-title">Коды МКБ-10</div>
+    <div class="text-block">{{ report.diagnosis_icd_codes | join(', ') }}</div>
+    {% endif %}
+
+    <div class="section-title">Описание</div>
+    <div class="text-block">{{ report.description_text or '—' }}</div>
+
+    <div class="section-title">Заключение</div>
+    <div class="text-block">{{ report.conclusion_text or '—' }}</div>
+
+    <div class="section-title">Врач</div>
+    <table>
+        <tr>
+            <th>ФИО</th>
+            <td>
+                {{ radiologist.last_name or '' }} {{ radiologist.first_name or '' }} {{ radiologist.middle_name or '' }}
+            </td>
+        </tr>
+        {% if radiologist.specialization %}
+        <tr>
+            <th>Специализация</th>
+            <td>{{ radiologist.specialization }}</td>
+        </tr>
+        {% endif %}
+        {% if radiologist.license_number %}
+        <tr>
+            <th>№ лицензии/сертификата</th>
+            <td>{{ radiologist.license_number }}</td>
+        </tr>
+        {% endif %}
+        {% if report.signed_at %}
+        <tr>
+            <th>Дата подписи</th>
+            <td>{{ report.signed_at }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    {% if report.content_hash %}
+    <div class="section-title">Электронная подпись (SHA-256)</div>
+    <div class="hash">{{ report.content_hash }}</div>
+    {% endif %}
+
+    <div class="footer">
+        Сформировано: {{ generated_at }}<br>
+        {% if report.status == 'ISSUED' %}
+        Заключение подписано и выдано.
+        {% else %}
+        Данный документ не является окончательным заключением.
+        {% endif %}
+    </div>
+</body>
+</html>

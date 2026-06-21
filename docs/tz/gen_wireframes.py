@@ -1,0 +1,1121 @@
+# -*- coding: utf-8 -*-
+"""Generate RIS MVP Wireframes - 13 screens, dark/light theme, Russian statuses."""
+
+CSS = """
+:root{
+  --bg:#f0f2f5;--surface:#fff;--surface2:#f8f9fa;--surface3:#f1f5f9;
+  --sidebar:#1e293b;--sidebar2:#0f172a;--topbar:#1e293b;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--text2:#64748b;--text3:#94a3b8;
+  --accent:#2563eb;--accent2:#1d4ed8;--accent-bg:#eff6ff;
+  --ok:#16a34a;--ok-bg:#f0fdf4;--warn:#d97706;--warn-bg:#fffbeb;
+  --danger:#dc2626;--danger-bg:#fef2f2;
+  --radius:4px;--shadow:0 1px 3px rgba(0,0,0,.1);
+  --font:'Inter','Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono','Courier New',monospace;
+  /* statuses */
+  --s-new-bg:#dbeafe;    --s-new-c:#1d4ed8;
+  --s-sch-bg:#dcfce7;    --s-sch-c:#15803d;
+  --s-arr-bg:#cffafe;    --s-arr-c:#0e7490;
+  --s-prg-bg:#fef9c3;    --s-prg-c:#a16207;
+  --s-acq-bg:#ede9fe;    --s-acq-c:#6d28d9;
+  --s-tor-bg:#ffedd5;    --s-tor-c:#c2410c;
+  --s-rep-bg:#dbeafe;    --s-rep-c:#1e40af;
+  --s-sgn-bg:#d1fae5;    --s-sgn-c:#065f46;
+  --s-iss-bg:#f1f5f9;    --s-iss-c:#475569;
+  --s-can-bg:#fee2e2;    --s-can-c:#b91c1c;
+  --s-cito-bg:#dc2626;   --s-cito-c:#fff;
+  --s-urg-bg:#d97706;    --s-urg-c:#fff;
+  --s-pln-bg:#e2e8f0;    --s-pln-c:#475569;
+}
+[data-theme=dark]{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--surface3:#161b22;
+  --sidebar:#010409;--sidebar2:#0d1117;--topbar:#010409;
+  --border:#30363d;--border2:#21262d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --accent:#58a6ff;--accent2:#388bfd;--accent-bg:#121d2f;
+  --ok:#3fb950;--ok-bg:#0d2d17;--warn:#d29922;--warn-bg:#271d04;
+  --danger:#f85149;--danger-bg:#2d0f0f;
+  --s-new-bg:#1e3a5f;    --s-new-c:#93c5fd;
+  --s-sch-bg:#14532d;    --s-sch-c:#86efac;
+  --s-arr-bg:#164e63;    --s-arr-c:#67e8f9;
+  --s-prg-bg:#451a03;    --s-prg-c:#fcd34d;
+  --s-acq-bg:#2e1065;    --s-acq-c:#c4b5fd;
+  --s-tor-bg:#431407;    --s-tor-c:#fdba74;
+  --s-rep-bg:#1e3a5f;    --s-rep-c:#93c5fd;
+  --s-sgn-bg:#052e16;    --s-sgn-c:#86efac;
+  --s-iss-bg:#1e2d3d;    --s-iss-c:#8b949e;
+  --s-can-bg:#450a0a;    --s-can-c:#fca5a5;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);font-size:13px;background:var(--bg);color:var(--text)}
+/* theme transition — only active during the switch, avoids slowing down hover/focus */
+html.switching *,html.switching *::before,html.switching *::after{
+  transition:background-color .35s ease,color .3s ease,border-color .3s ease,box-shadow .3s ease !important;
+}
+/* theme button animation */
+#theme-btn{transition:transform .25s ease,opacity .2s}
+#theme-btn.spin{animation:theme-spin .35s ease}
+@keyframes theme-spin{
+  0%{transform:rotate(0) scale(1)}
+  40%{transform:rotate(180deg) scale(.8);opacity:.6}
+  100%{transform:rotate(360deg) scale(1);opacity:1}
+}
+/* topbar */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--topbar);height:42px;display:flex;align-items:center;padding:0 10px;gap:3px;flex-wrap:nowrap;overflow-x:auto}
+#topbar .sep{width:1px;height:20px;background:#444;margin:0 4px;flex-shrink:0}
+#topbar .lbl{color:#6b7280;font-size:10px;white-space:nowrap;margin-right:2px}
+.tnav{background:transparent;color:#9ca3af;border:none;border-radius:3px;padding:4px 9px;cursor:pointer;font-size:11px;white-space:nowrap;transition:background .15s}
+.tnav:hover{background:#374151;color:#e5e7eb}
+.tnav.active{background:#2563eb;color:#fff}
+#theme-btn{margin-left:auto;flex-shrink:0;background:#374151;color:#e5e7eb;border:none;border-radius:3px;padding:4px 10px;cursor:pointer;font-size:12px}
+/* layout */
+.screen{display:none;margin-top:42px;min-height:calc(100vh - 42px)}
+.screen.on{display:flex;flex-direction:column}
+.shell{display:flex;flex:1;min-height:calc(100vh - 42px - 32px)}
+/* role bar */
+.rolebar{height:26px;background:var(--sidebar2);color:#6b7280;font-size:10px;letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border)}
+/* sidebar */
+.side{width:200px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;padding:10px 0;border-right:1px solid #0f172a}
+.side-logo{padding:0 14px 12px;font-weight:700;font-size:14px;color:#f1f5f9;border-bottom:1px solid #334155;margin-bottom:8px;letter-spacing:.3px}
+.side-logo small{font-size:10px;color:#64748b;display:block;font-weight:400}
+.side-sec{padding:5px 14px 2px;font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.7px}
+.side-item{padding:7px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8;border-left:3px solid transparent;cursor:pointer;transition:background .15s}
+.side-item:hover{background:#1e293b;color:#e2e8f0}
+.side-item.on{background:#1e3a5f;color:#e2e8f0;border-left-color:#2563eb}
+.side-item .ico{width:16px;text-align:center;font-size:13px}
+.side-badge{margin-left:auto;background:#dc2626;color:#fff;border-radius:8px;padding:1px 5px;font-size:10px}
+.side-user{margin-top:auto;padding:10px 14px;border-top:1px solid #1e293b;font-size:11px;color:#64748b}
+.side-user strong{color:#94a3b8;display:block}
+/* main */
+.main{flex:1;overflow:auto;background:var(--bg)}
+.phead{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+.phead h1{font-size:15px;font-weight:600}
+.phead .sub{font-size:11px;color:var(--text2);margin-top:1px}
+.pcontent{padding:14px 18px}
+/* stat cards */
+.stats{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;min-width:130px;flex:1;box-shadow:var(--shadow)}
+.scard .lbl{font-size:11px;color:var(--text2);margin-bottom:3px}
+.scard .val{font-size:22px;font-weight:700}
+.scard .sub{font-size:10px;color:var(--text2);margin-top:2px}
+.scard.ok .val{color:var(--ok)} .scard.warn .val{color:var(--warn)} .scard.danger .val{color:var(--danger)}
+/* table */
+.twrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:11px;font-weight:600;border-bottom:2px solid var(--border2);white-space:nowrap;color:var(--text2)}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--accent-bg)}
+tr.tr-cito{background:#fef2f2!important} [data-theme=dark] tr.tr-cito{background:#2d0f0f!important}
+tr.tr-urg{background:#fffbeb!important}  [data-theme=dark] tr.tr-urg{background:#271d04!important}
+/* badges */
+.b{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.b::before{content:'●';font-size:7px}
+.b-new{background:var(--s-new-bg);color:var(--s-new-c)}
+.b-sch{background:var(--s-sch-bg);color:var(--s-sch-c)}
+.b-arr{background:var(--s-arr-bg);color:var(--s-arr-c)}
+.b-prg{background:var(--s-prg-bg);color:var(--s-prg-c)}
+.b-acq{background:var(--s-acq-bg);color:var(--s-acq-c)}
+.b-tor{background:var(--s-tor-bg);color:var(--s-tor-c)}
+.b-rep{background:var(--s-rep-bg);color:var(--s-rep-c)}
+.b-sgn{background:var(--s-sgn-bg);color:var(--s-sgn-c)}
+.b-iss{background:var(--s-iss-bg);color:var(--s-iss-c)}
+.b-can{background:var(--s-can-bg);color:var(--s-can-c)}
+.b-cito{background:var(--s-cito-bg);color:var(--s-cito-c)}
+.b-urg{background:var(--s-urg-bg);color:var(--s-urg-c)}
+.b-pln{background:var(--s-pln-bg);color:var(--s-pln-c)}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-role{background:var(--accent-bg);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600}
+/* buttons */
+.btn{padding:5px 12px;border:1px solid var(--border2);background:var(--surface);border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text);transition:opacity .15s;white-space:nowrap;font-family:var(--font)}
+.btn:hover{opacity:.85}
+.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn-d{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-sm{padding:3px 8px;font-size:11px}
+/* forms */
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.fsec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.frow{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px}
+.fg label{font-size:11px;font-weight:600;color:var(--text2)}
+.req{color:var(--danger)}
+.fg input,.fg select,.fg textarea{border:1px solid var(--border2);border-radius:var(--radius);padding:5px 8px;font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text);transition:border .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent)}
+.fg .ro{background:var(--surface2);color:var(--text2);cursor:default}
+.fg textarea{resize:vertical;min-height:60px}
+.fhint{font-size:10px;color:var(--text3);margin-top:1px}
+.ferr{font-size:10px;color:var(--danger);margin-top:1px}
+.faction{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border);margin-top:4px}
+/* layout helpers */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sl{display:grid;grid-template-columns:300px 1fr;gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+.ct{font-size:12px;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);color:var(--text)}
+.div{height:1px;background:var(--border);margin:10px 0}
+.ir{display:flex;gap:4px;font-size:11px;margin-bottom:5px}
+.ir .l{color:var(--text2);min-width:130px;flex-shrink:0}
+.ir .v{font-weight:500}
+/* search */
+.sbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.si{position:relative;flex:1;min-width:180px}
+.si input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--surface);color:var(--text)}
+.si::before{content:'🔍';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px}
+/* filter strip */
+.fstrip{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:7px 12px;margin-bottom:12px;font-size:11px}
+.fstrip label{color:var(--text2)}
+.fstrip select,.fstrip input[type=date]{padding:3px 6px;border:1px solid var(--border2);border-radius:var(--radius);font-size:11px;background:var(--surface);color:var(--text)}
+/* calendar */
+.cal{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.cal-hdr{display:grid;grid-template-columns:56px repeat(6,1fr);background:var(--surface2);border-bottom:2px solid var(--border2)}
+.cal-hdr>div{padding:6px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--text2)}
+.cal-body{display:grid;grid-template-columns:56px repeat(6,1fr)}
+.cal-t{background:var(--surface2);padding:3px 5px;text-align:right;font-size:10px;color:var(--text3);display:flex;align-items:flex-start;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cal-c{padding:2px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:34px}
+.ev{border-radius:2px;padding:2px 4px;font-size:10px;margin-bottom:1px;cursor:pointer;border-left:3px solid}
+.ev-s{background:var(--s-sch-bg);color:var(--s-sch-c);border-color:var(--ok)}
+.ev-a{background:var(--s-arr-bg);color:var(--s-arr-c);border-color:#0e7490}
+.ev-f{background:var(--surface2);color:var(--text3);border-color:var(--border2)}
+.ev-sel{background:var(--accent-bg);color:var(--accent);border:2px dashed var(--accent);border-radius:2px;padding:2px 4px;font-size:10px;cursor:pointer}
+/* viewer */
+.vwrap{background:#111;border-radius:var(--radius) var(--radius) 0 0}
+.vtb{background:#1a1a1a;padding:5px 8px;display:flex;gap:5px;align-items:center;border-radius:var(--radius) var(--radius) 0 0}
+.vbtn{background:#333;color:#bbb;border:none;border-radius:2px;padding:3px 7px;font-size:10px;cursor:pointer}
+.vpane{background:#111;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#555;font-size:11px;min-height:220px}
+/* 3col report */
+.rcols{display:grid;grid-template-columns:250px 1fr 310px;height:calc(100vh - 42px - 26px - 42px);overflow:hidden}
+.rpanel{border-right:1px solid var(--border);overflow-y:auto;background:var(--surface)}
+.rpanel:last-child{border-right:none}
+.rph{padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.rpb{padding:10px 12px}
+/* status timeline */
+.tl{display:flex;flex-direction:column;gap:0}
+.tl-step{display:flex;gap:8px;padding:4px 0;align-items:flex-start}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dot-done{background:var(--ok)} .dot-now{background:var(--accent)} .dot-wait{background:var(--border2)}
+.tl-info .t{font-size:11px;font-weight:600} .tl-info .s{font-size:10px;color:var(--text2)}
+/* signature */
+.sigbox{border:2px dashed var(--ok);border-radius:var(--radius);padding:8px 10px;background:var(--ok-bg);display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--ok)}
+/* mini chart */
+.mc{background:var(--surface2);border-radius:var(--radius);padding:8px 10px;font-size:11px}
+.mc-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.mc-lbl{width:80px;font-size:10px;color:var(--text2);text-align:right;flex-shrink:0}
+.mc-bar{height:12px;background:var(--accent);border-radius:2px}
+.mc-val{font-size:10px;color:var(--text2)}
+/* tag / pill */
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:var(--accent-bg);color:var(--accent)}
+.pill{padding:3px 10px;border:1px solid var(--border2);border-radius:10px;font-size:11px;cursor:pointer;background:var(--surface);color:var(--text)}
+.pill.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* info box */
+.ibox{background:var(--accent-bg);border:1px solid #bfdbfe;border-radius:var(--radius);padding:8px 12px;font-size:11px;margin-bottom:12px;color:var(--accent)}
+[data-theme=dark] .ibox{border-color:#1e3a5f}
+.wbox{background:var(--warn-bg);border:1px solid #fcd34d;border-radius:var(--radius);padding:8px 12px;font-size:11px;margin-bottom:12px;color:var(--warn)}
+[data-theme=dark] .wbox{border-color:#451a03}
+/* flex utils */
+.flex{display:flex}.fcol{display:flex;flex-direction:column}.fwrap{flex-wrap:wrap}
+.ic{align-items:center}.jb{justify-content:space-between}.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}
+.ml-a{margin-left:auto}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mt8{margin-top:8px}
+.muted{color:var(--text2)}.small{font-size:11px}.mono{font-family:var(--mono)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-bg);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
+code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:2px}
+"""
+
+def sid(items, active, user):
+    groups = {
+        "Главное": [("📊","s-dash","Дашборд"),("👥","s-pts","Пациенты"),("📋","s-ord","Направления"),("📅","s-cal","Расписание")],
+        "Рабочие места": [("🔬","s-wl","Worklist"),("📝","s-rep","Описание")],
+        "Система": [("🔗","s-unm","Несопоставлено","2"),("⚙️","s-ref","Справочники →")],
+    }
+    o=f'<nav class="side"><div class="side-logo">RIS <small>Диагностический центр</small></div>'
+    for sec,itms in groups.items():
+        o+=f'<div class="side-sec">{sec}</div>'
+        for it in itms:
+            ico,sid_,lbl=it[0],it[1],it[2]
+            badge=f'<span class="side-badge">{it[3]}</span>' if len(it)>3 else ""
+            cls="on" if sid_==active else ""
+            o+=f'<div class="side-item {cls}" onclick="go(\'{sid_}\')"><span class="ico">{ico}</span>{lbl}{badge}</div>'
+    o+=f'<div class="side-user"><strong>{user[0]}</strong>{user[1]}</div></nav>'
+    return o
+
+def phead(title, sub="", btns=""):
+    return f'<div class="phead"><div><h1>{title}</h1>{"<div class=sub>"+sub+"</div>" if sub else ""}</div>{btns}</div>'
+
+def b(cls,txt): return f'<span class="b b-{cls}">{txt}</span>'
+
+STATUSES = {
+    "new":("new","НОВОЕ"),"sch":("sch","ЗАПЛАНИРОВАНО"),"arr":("arr","ПРИБЫЛ"),
+    "prg":("prg","В РАБОТЕ"),"acq":("acq","СНИМКИ ПОЛУЧЕНЫ"),"tor":("tor","К ОПИСАНИЮ"),
+    "rep":("rep","ОПИСЫВАЕТСЯ"),"sgn":("sgn","ПОДПИСАНО"),"iss":("iss","ВЫДАНО"),
+    "can":("can","ОТМЕНЕНО"),"cito":("cito","CITO"),"urg":("urg","СРОЧНЫЙ"),"pln":("pln","ПЛАНОВЫЙ"),
+}
+
+def bs(k): return b(*STATUSES[k])
+
+# ── SCREEN BUILDER ─────────────────────────────────────────────────────────────
+
+def screen(sid_, role, sidebar_active, user, content, classes=""):
+    s = sid([],sidebar_active,user)
+    return f"""
+<div class="screen {classes}" id="{sid_}">
+  <div class="rolebar">Роль: {role}</div>
+  <div class="shell">{s}<div class="main">{content}</div></div>
+</div>"""
+
+# ── S1: DASHBOARD ──────────────────────────────────────────────────────────────
+
+s_dash = screen("s-dash","Заведующий отделением / Администратор","s-dash",
+    ("Асанов Б.Е.","Заведующий"),
+    phead("Дашборд","13 июня 2026 · Понедельник",
+          '<div class="flex ic g8 ml-a"><select class="btn btn-sm"><option>Сегодня</option><option>Неделя</option><option>Месяц</option></select><button class="btn btn-sm">⬇ Экспорт</button></div>')
+    +"""<div class="pcontent">
+<div class="stats">
+  <div class="scard ok"><div class="lbl">Исследований сегодня</div><div class="val">47</div><div class="sub">+5 к вчерашнему</div></div>
+  <div class="scard"><div class="lbl">К описанию</div><div class="val">12</div><div class="sub">ждут врача</div></div>
+  <div class="scard ok"><div class="lbl">Средний TAT</div><div class="val">1:42</div><div class="sub">ч:мин · норма &lt;2:00</div></div>
+  <div class="scard danger"><div class="lbl">Просроченных</div><div class="val">3</div><div class="sub">TAT &gt; 4 ч</div></div>
+  <div class="scard"><div class="lbl">Аппараты активны</div><div class="val">5/6</div><div class="sub">МРТ-2 — ТО</div></div>
+  <div class="scard warn"><div class="lbl">Не сопоставлено</div><div class="val">2</div><div class="sub">студии без заказа</div></div>
+</div>
+<div class="two mb12">
+  <div class="card"><div class="ct">Нагрузка по аппаратам (сегодня)</div>
+    <div class="mc">
+      <div class="mc-row"><div class="mc-lbl">КТ-1</div><div class="mc-bar" style="width:90%"></div><div class="mc-val">18</div></div>
+      <div class="mc-row"><div class="mc-lbl">КТ-2</div><div class="mc-bar" style="width:60%"></div><div class="mc-val">12</div></div>
+      <div class="mc-row"><div class="mc-lbl">МРТ-1</div><div class="mc-bar" style="width:55%"></div><div class="mc-val">11</div></div>
+      <div class="mc-row"><div class="mc-lbl">МРТ-2</div><div class="mc-bar" style="width:0%;background:var(--border2)"></div><div class="mc-val" style="color:var(--danger)">ТО</div></div>
+      <div class="mc-row"><div class="mc-lbl">РГ-1</div><div class="mc-bar" style="width:30%"></div><div class="mc-val">6</div></div>
+    </div>
+  </div>
+  <div class="card"><div class="ct">Нагрузка по врачам (описания)</div>
+    <div class="mc">
+      <div class="mc-row"><div class="mc-lbl">Нурланов А.</div><div class="mc-bar" style="width:80%"></div><div class="mc-val">16</div></div>
+      <div class="mc-row"><div class="mc-lbl">Карпова С.</div><div class="mc-bar" style="width:65%"></div><div class="mc-val">13</div></div>
+      <div class="mc-row"><div class="mc-lbl">Власов Д.</div><div class="mc-bar" style="width:45%"></div><div class="mc-val">9</div></div>
+      <div class="mc-row"><div class="mc-lbl">Мамедова А.</div><div class="mc-bar" style="width:45%"></div><div class="mc-val">9</div></div>
+    </div>
+  </div>
+</div>
+<div class="flex ic jb mb8"><strong>Активные исследования</strong>
+  <div class="flex g8"><button class="btn btn-sm">Только просроченные</button><button class="btn btn-sm btn-p">Все →</button></div></div>
+<div class="twrap"><table><thead><tr>
+  <th>Приоритет</th><th>Время</th><th>Пациент</th><th>Услуга</th><th>Аппарат</th><th>Статус</th><th>TAT</th><th>Врач</th><th></th>
+</tr></thead><tbody>
+<tr class="tr-cito"><td>"""+bs("cito")+"""</td><td>08:15</td><td><strong>Смирнов В.И.</strong><br><span class="muted small">1979</span></td><td>КТ грудной клетки</td><td>КТ-1</td><td>"""+bs("rep")+"""</td><td style="color:var(--danger);font-weight:700">4:32 ⚠</td><td>Нурланов А.</td><td><button class="btn btn-sm">Открыть</button></td></tr>
+<tr class="tr-urg"><td>"""+bs("urg")+"""</td><td>09:00</td><td><strong>Байжанова А.С.</strong><br><span class="muted small">1988</span></td><td>МРТ головного мозга</td><td>МРТ-1</td><td>"""+bs("acq")+"""</td><td>1:12</td><td>—</td><td><button class="btn btn-sm btn-p">Назначить</button></td></tr>
+<tr><td>"""+bs("pln")+"""</td><td>09:30</td><td><strong>Дюсенов Е.Т.</strong></td><td>Рентген лёгких</td><td>РГ-1</td><td>"""+bs("sgn")+"""</td><td>0:45</td><td>Карпова С.</td><td><button class="btn btn-sm">Открыть</button></td></tr>
+<tr><td>"""+bs("pln")+"""</td><td>10:00</td><td><strong>Исабекова Г.Н.</strong></td><td>КТ брюшной полости</td><td>КТ-2</td><td>"""+bs("prg")+"""</td><td>0:28</td><td>—</td><td></td></tr>
+<tr><td>"""+bs("pln")+"""</td><td>10:15</td><td><strong>Ахметов Р.К.</strong></td><td>МРТ позвоночника</td><td>МРТ-1</td><td>"""+bs("sch")+"""</td><td>—</td><td>—</td><td></td></tr>
+</tbody></table></div></div>""","on")
+
+# ── S2: PATIENTS ───────────────────────────────────────────────────────────────
+
+s_pts = screen("s-pts","Регистратор — Список пациентов","s-pts",
+    ("Алиева Д.М.","Регистратор"),
+    phead("Пациенты","База пациентов диагностического центра",
+          '<button class="btn btn-p btn-sm ml-a" onclick="go(\'s-pcard\')">+ Новый пациент</button>')
+    +"""<div class="pcontent">
+<div class="sbar">
+  <div class="si"><input type="text" placeholder="Поиск по ФИО, ИИН, телефону…" value="Байж"></div>
+  <select class="btn btn-sm"><option>Все пациенты</option><option>Только с заключениями</option></select>
+</div>
+<div class="ibox">🔍 Найдено 3 результата по запросу «<strong>Байж</strong>»</div>
+<div class="twrap"><table><thead><tr>
+  <th>ФИО</th><th>ИИН</th><th>Дата рождения</th><th>Телефон</th><th>Последнее исследование</th><th>Льгота</th><th></th>
+</tr></thead><tbody>
+<tr style="background:var(--accent-bg)">
+  <td><strong>Байжанова Айгерим Сериковна</strong></td>
+  <td><code>880312400215</code></td><td>12.03.1988</td><td>+7 (701) 234-56-78</td>
+  <td>13.06.2026 · МРТ гол. мозга</td><td><span class="tag">ОСМС</span></td>
+  <td><button class="btn btn-sm btn-p" onclick="go('s-pcard')">Открыть</button></td>
+</tr>
+<tr><td>Байжанов Ермек Болатович</td><td><code>710509300147</code></td><td>09.05.1971</td><td>+7 (777) 891-23-45</td><td>02.04.2026 · Рентген лёгких</td><td>—</td><td><button class="btn btn-sm">Открыть</button></td></tr>
+<tr><td>Байжанова Карима Асхатовна</td><td><code>010228550088</code></td><td>28.02.2001</td><td>+7 (747) 654-32-10</td><td>—</td><td><span class="tag">ГОБМП</span></td><td><button class="btn btn-sm">Открыть</button></td></tr>
+</tbody></table></div></div>""")
+
+# ── S3: PATIENT CARD ───────────────────────────────────────────────────────────
+
+s_pcard = screen("s-pcard","Регистратор — Карточка пациента","s-pts",
+    ("Алиева Д.М.","Регистратор"),
+    phead("Байжанова Айгерим Сериковна",
+          "ИИН: 880312400215 · Создан: 15.01.2025 · alieva.d",
+          '<div class="flex g8 ml-a"><button class="btn btn-sm" onclick="go(\'s-pts\')">← Назад</button><button class="btn btn-sm">✏ Редактировать</button><button class="btn btn-sm btn-p" onclick="go(\'s-ord\')">+ Направление</button></div>')
+    +"""<div class="pcontent"><div class="sl">
+<div class="fcol g12">
+  <div class="card">
+    <div class="flex g12 mb8">
+      <div class="avatar" style="width:48px;height:48px;font-size:18px">АБ</div>
+      <div><div style="font-weight:700;font-size:14px">Байжанова А.С.</div>
+        <div class="muted small">Женский · 38 лет</div>
+        <div class="mt8">"""+b("ok","ОСМС")+"""</div></div>
+    </div><div class="div"></div>
+    <div class="ir"><div class="l">ИИН</div><div class="v"><code>880312400215</code></div></div>
+    <div class="ir"><div class="l">Дата рождения</div><div class="v">12.03.1988</div></div>
+    <div class="ir"><div class="l">Пол</div><div class="v">Женский</div></div>
+    <div class="ir"><div class="l">Телефон</div><div class="v">+7 (701) 234-56-78</div></div>
+    <div class="ir"><div class="l">E-mail</div><div class="v muted">bayzhanova@mail.ru</div></div>
+    <div class="ir"><div class="l">Льготная категория</div><div class="v"><span class="tag">ОСМС</span></div></div>
+    <div class="ir"><div class="l">Комментарий</div><div class="v muted small">⚠ Аллергия на йодный контраст</div></div>
+  </div>
+  <div class="card"><div class="ct">Быстрые действия</div>
+    <div class="fcol g6">
+      <button class="btn btn-p" onclick="go('s-ord')" style="width:100%">+ Создать направление</button>
+      <button class="btn" style="width:100%">📄 Печать карточки</button>
+    </div>
+  </div>
+</div>
+<div>
+  <div class="flex ic jb mb8"><strong>История исследований</strong>
+    <div class="flex g6">
+      <div class="pill on">Все</div><div class="pill">КТ</div><div class="pill">МРТ</div><div class="pill">РГ</div>
+    </div>
+  </div>
+  <div class="twrap"><table><thead><tr><th>Дата</th><th>Услуга</th><th>Аппарат</th><th>Статус</th><th>Врач</th><th></th></tr></thead><tbody>
+  <tr style="background:var(--accent-bg)">
+    <td><strong>13.06.2026</strong><br><span class="muted small">09:00</span></td>
+    <td>МРТ головного мозга</td><td>МРТ-1</td><td>"""+bs("acq")+"""</td><td>—</td>
+    <td><button class="btn btn-sm btn-p">Открыть</button></td>
+  </tr>
+  <tr><td>10.03.2026<br><span class="muted small">14:30</span></td><td>КТ грудной клетки</td><td>КТ-1</td><td>"""+bs("iss")+"""</td><td>Нурланов А.</td><td><button class="btn btn-sm">PDF</button></td></tr>
+  <tr><td>15.01.2026<br><span class="muted small">09:15</span></td><td>Рентген лёгких</td><td>РГ-1</td><td>"""+bs("iss")+"""</td><td>Карпова С.</td><td><button class="btn btn-sm">PDF</button></td></tr>
+  </tbody></table></div>
+</div></div></div>""")
+
+# ── S4: ORDER ──────────────────────────────────────────────────────────────────
+
+s_ord = screen("s-ord","Регистратор — Создание направления","s-ord",
+    ("Алиева Д.М.","Регистратор"),
+    phead("Новое направление","Байжанова Айгерим Сериковна · ИИН 880312400215",
+          '<button class="btn btn-sm ml-a" onclick="go(\'s-pcard\')">← Пациент</button>')
+    +"""<div class="pcontent"><div class="fcard" style="max-width:800px">
+<div class="ibox flex ic g12 mb12">
+  <div class="avatar">АБ</div>
+  <div><strong>Байжанова Айгерим Сериковна</strong> · 12.03.1988 · Женский<br>
+    <span class="muted small">ИИН: 880312400215 · Льгота: ОСМС</span></div>
+  <button class="btn btn-sm ml-a">Сменить</button>
+</div>
+<div class="fsec-title">Услуга и исследование</div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Услуга (тарификатор МЗ РК) <span class="req">*</span></label>
+    <input value="A06.20.010 — МРТ головного мозга без контраста">
+    <div class="fhint">Код ОСМС: A06.20.010-О · Тариф ОСМС: 18 200 ₸ · Длительность: 45 мин</div></div>
+  <div class="fg"><label>Модальность <span class="req">*</span></label>
+    <select><option>MR — МРТ</option><option>CT — КТ</option><option>CR — Рентген</option><option>US — УЗИ</option></select></div>
+  <div class="fg"><label>Область</label><input value="Головной мозг"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Контрастное вещество</label>
+    <select><option>Без контраста</option><option>С контрастом</option></select></div>
+  <div class="fg"><label>Приоритет <span class="req">*</span></label>
+    <div class="flex g6 mt8">
+      <div class="pill on">Плановый</div><div class="pill">Срочный</div>
+      <div class="pill" style="border-color:var(--danger);color:var(--danger)">Cito</div>
+    </div></div>
+  <div class="fg"><label>Тип финансирования <span class="req">*</span></label>
+    <div class="flex g6 mt8">
+      <div class="pill">ГОБМП</div><div class="pill on">ОСМС</div><div class="pill">Платно</div>
+    </div></div>
+</div>
+<div class="fsec-title">Клинические данные</div>
+<div class="frow">
+  <div class="fg"><label>Врач-направитель <span class="req">*</span></label>
+    <input value="Петрова М.А. — терапевт, поликлиника №3"></div>
+  <div class="fg"><label>Предв. диагноз (МКБ-10)</label>
+    <input value="G35 — Рассеянный склероз">
+    <div class="fhint">Поиск по коду или названию</div></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Клинические сведения</label>
+    <textarea>Головные боли в течение 3 месяцев. Головокружение. МРТ 2 года назад — без патологии. Направлен невропатологом.</textarea></div>
+</div>
+<div class="fsec-title">Автоматически</div>
+<div class="frow">
+  <div class="fg"><label>Accession Number</label><input class="ro" value="260613-00512" readonly></div>
+  <div class="fg"><label>Дата создания</label><input class="ro" value="13.06.2026 10:45" readonly></div>
+  <div class="fg"><label>Статус</label><input class="ro" value="НОВОЕ" readonly></div>
+</div>
+<div class="faction">
+  <button class="btn btn-p" onclick="go('s-cal')">Сохранить и записать →</button>
+  <button class="btn">Сохранить (без записи)</button>
+  <button class="btn">Отмена</button>
+</div></div></div>""")
+
+# ── S5: SCHEDULE ───────────────────────────────────────────────────────────────
+
+s_cal = screen("s-cal","Регистратор — Расписание","s-cal",
+    ("Алиева Д.М.","Регистратор"),
+    phead("Расписание","Запись: Байжанова А.С. · МРТ головного мозга · AN: 260613-00512")
+    +"""<div class="pcontent">
+<div class="fstrip">
+  <label>Аппарат:</label>
+  <select><option>МРТ-1 (активен)</option><option disabled>МРТ-2 (ТО)</option><option>КТ-1</option><option>РГ-1</option></select>
+  <label>Неделя:</label>
+  <input type="date" value="2026-06-13">
+  <button class="btn btn-sm">← Пред.</button>
+  <button class="btn btn-sm">Сегодня</button>
+  <button class="btn btn-sm">След. →</button>
+</div>
+<div class="cal">
+  <div class="cal-hdr">
+    <div></div>
+    <div>ПН<br><strong>13</strong></div><div>ВТ<br>14</div><div>СР<br>15</div>
+    <div>ЧТ<br>16</div><div>ПТ<br>17</div><div style="color:var(--danger)">СБ<br>18</div>
+  </div>
+  <div class="cal-body">
+    <div class="cal-t">08:00</div>
+    <div class="cal-c"><div class="ev ev-a">Исаков И.Т.<br>МРТ гол. мозга</div></div>
+    <div class="cal-c"><div class="ev ev-f">Свободно</div></div>
+    <div class="cal-c"><div class="ev ev-s">Ержанов А.Б.</div></div>
+    <div class="cal-c"></div>
+    <div class="cal-c"><div class="ev ev-s">Аубакир С.</div></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+
+    <div class="cal-t">09:00</div>
+    <div class="cal-c"><div class="ev ev-a">Насыров К.Б.<br>МРТ позв.</div></div>
+    <div class="cal-c"><div class="ev ev-s">Муратова Г.</div></div>
+    <div class="cal-c"><div class="ev ev-f">Свободно</div></div>
+    <div class="cal-c"><div class="ev ev-s">Нурпеисов К.</div></div>
+    <div class="cal-c"></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+
+    <div class="cal-t">10:00</div>
+    <div class="cal-c" onclick="alert('Записать Байжанову А.С. на 13.06 10:00 → МРТ-1?')" title="Нажмите, чтобы записать">
+      <div class="ev-sel">✓ Свободно — записать</div></div>
+    <div class="cal-c"><div class="ev ev-s">Касенов Д.</div></div>
+    <div class="cal-c"><div class="ev ev-s">Смирнов В.</div></div>
+    <div class="cal-c"><div class="ev ev-f">Свободно</div></div>
+    <div class="cal-c"><div class="ev ev-s">Абдуллин Р.</div></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+
+    <div class="cal-t">11:00</div>
+    <div class="cal-c"><div class="ev ev-s">Дюсенов Е.</div></div>
+    <div class="cal-c"><div class="ev ev-f">Свободно</div></div>
+    <div class="cal-c"><div class="ev ev-f">Свободно</div></div>
+    <div class="cal-c"><div class="ev ev-s">Петрова К.</div></div>
+    <div class="cal-c"><div class="ev ev-s">Ким А.В.</div></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+
+    <div class="cal-t" style="color:var(--text3)">12:00</div>
+    <div class="cal-c" style="background:var(--surface2)"><div class="ev ev-f" style="opacity:.5">Обед</div></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+    <div class="cal-c" style="background:var(--surface2)"></div>
+  </div>
+</div>
+<div class="flex g8 mt8 small muted">
+  <div class="ev ev-s" style="padding:2px 8px">Запланировано</div>
+  <div class="ev ev-a" style="padding:2px 8px">В процессе</div>
+  <div class="ev ev-f" style="padding:2px 8px">Свободно</div>
+  <div class="ev-sel" style="padding:2px 8px">Выбрать для записи</div>
+</div></div>""")
+
+# ── S6: WORKLIST ───────────────────────────────────────────────────────────────
+
+s_wl = screen("s-wl","Рентгенолаборант — Worklist аппарата МРТ-1","s-wl",
+    ("Сериков Т.Б.","Лаборант · МРТ-1"),
+    phead("Worklist — МРТ-1","13 июня 2026 · 7 исследований запланировано",
+          '<div class="flex g8 ml-a ic"><span class="b b-sgn">● АКТИВЕН</span><button class="btn btn-sm">🔄 Обновить</button></div>')
+    +"""<div class="pcontent">
+<div class="fstrip">
+  <label>Дата:</label><input type="date" value="2026-06-13">
+  <label>Статус:</label>
+  <select><option>Запланировано, Прибыл, В работе</option><option>Все статусы</option></select>
+  <label>Приоритет:</label>
+  <select><option>Все</option><option>Только Cito/Срочный</option></select>
+</div>
+<div class="wbox">⚠ 2 студии не сопоставлены с заказом. <a href="#" onclick="go('s-unm');return false">Перейти к ручному связыванию →</a></div>
+<div class="twrap"><table><thead><tr>
+  <th>Приор.</th><th>Время</th><th>Пациент</th><th>Услуга</th><th>AN</th><th>Статус</th><th>Действия</th>
+</tr></thead><tbody>
+<tr class="tr-urg"><td>"""+bs("urg")+"""</td><td><strong>09:00</strong></td>
+  <td><strong>Байжанова А.С.</strong><br><span class="muted small">38 л · Ж · ИИН 880312…</span></td>
+  <td>МРТ головного мозга</td><td><code>260613-00512</code></td>
+  <td>"""+bs("acq")+"""</td>
+  <td><div class="flex g4"><button class="btn btn-sm btn-ok">✓ Принять QC</button><button class="btn btn-sm btn-d">↺ Переснять</button></div></td></tr>
+<tr style="background:var(--accent-bg)"><td>"""+bs("pln")+"""</td><td><strong>10:00</strong></td>
+  <td><strong>Ахметов Р.К.</strong><br><span class="muted small">54 л · М</span></td>
+  <td>МРТ позвоночника (поясн.)</td><td><code>260613-00498</code></td>
+  <td>"""+bs("sch")+"""</td>
+  <td><button class="btn btn-sm btn-p">Прибыл</button></td></tr>
+<tr><td>"""+bs("pln")+"""</td><td>10:45</td>
+  <td>Жаксыбеков Н.А.<br><span class="muted small">61 л · М</span></td>
+  <td>МРТ коленного сустава</td><td><code>260613-00503</code></td>
+  <td>"""+bs("sch")+"""</td>
+  <td><button class="btn btn-sm btn-p">Прибыл</button></td></tr>
+<tr><td>"""+bs("pln")+"""</td><td>11:30</td>
+  <td>Есенова М.Б.<br><span class="muted small">29 л · Ж</span></td>
+  <td>МРТ малого таза</td><td><code>260613-00519</code></td>
+  <td>"""+bs("sch")+"""</td>
+  <td><button class="btn btn-sm btn-p">Прибыл</button></td></tr>
+</tbody></table></div>
+<div class="fcard"><div class="ct">Форма контроля качества — «Переснять»</div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Причина <span class="req">*</span></label>
+    <select><option>— Выберите —</option><option>Движение пациента</option><option>Артефакты на снимке</option><option>Неверное положение</option><option>Технический сбой аппарата</option><option>Другое</option></select></div>
+  <div class="fg" style="flex:3"><label>Комментарий</label><input placeholder="Уточните причину…"></div>
+</div>
+<div class="faction"><button class="btn btn-sm btn-d">Подтвердить переснять</button><button class="btn btn-sm">Отмена</button></div>
+</div></div>""")
+
+# ── S7: REPORT ─────────────────────────────────────────────────────────────────
+
+s_rep = screen("s-rep","Врач-рентгенолог — Описание и заключение","s-rep",
+    ("Нурланов А.К.","Врач-рентгенолог"),
+    """<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:10px;font-size:12px">
+  <button class="btn btn-sm" onclick="go('s-wl')">← Worklist</button>
+  <strong>Байжанова Айгерим Сериковна</strong> <span class="muted">·</span>
+  <code>260613-00512</code> """+bs("urg")+bs("rep")+"""
+  <div class="ml-a flex g8">
+    <button class="btn btn-sm">💾 Черновик</button>
+    <button class="btn btn-sm btn-ok">🔏 Подписать</button>
+    <button class="btn btn-sm btn-p">📤 Выдать PDF</button>
+  </div></div>
+<div class="rcols">
+<!-- LEFT: patient info -->
+<div class="rpanel">
+  <div class="rph">Исследование</div>
+  <div class="rpb">
+    <div class="ir"><div class="l">Пациент</div><div class="v"><strong>Байжанова А.С.</strong></div></div>
+    <div class="ir"><div class="l">ИИН</div><div class="v"><code>880312400215</code></div></div>
+    <div class="ir"><div class="l">Дата рожд./Пол</div><div class="v">12.03.1988 · Ж · 38 л</div></div>
+    <div class="div"></div>
+    <div class="ir"><div class="l">Услуга</div><div class="v">МРТ головного мозга</div></div>
+    <div class="ir"><div class="l">Модальность</div><div class="v">MR</div></div>
+    <div class="ir"><div class="l">Аппарат</div><div class="v">МРТ-1 (Siemens 3T)</div></div>
+    <div class="ir"><div class="l">Лаборант</div><div class="v">Сериков Т.Б.</div></div>
+    <div class="ir"><div class="l">Снимки получены</div><div class="v">13.06.2026 09:47</div></div>
+    <div class="ir"><div class="l">Финансирование</div><div class="v"><span class="tag">ОСМС</span></div></div>
+    <div class="div"></div>
+    <div class="ir"><div class="l">Направитель</div><div class="v">Петрова М.А.</div></div>
+    <div class="ir"><div class="l">Предв. диагноз</div><div class="v">G35 — Рассеянный склероз</div></div>
+    <div class="ir"><div class="l">Клин. сведения</div><div class="v muted small">Головные боли 3 мес., головокружение. МРТ 2г назад — норма.</div></div>
+    <div class="div"></div>
+    <div style="font-size:11px;font-weight:700;margin-bottom:6px">Статус исследования</div>
+    <div class="tl">
+      <div class="tl-step"><div class="tl-dot dot-done"></div><div class="tl-info"><div class="t">НОВОЕ</div><div class="s">13.06 · 10:45</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-done"></div><div class="tl-info"><div class="t">ЗАПЛАНИРОВАНО</div><div class="s">13.06 · 10:46 · MWL→Orthanc</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-done"></div><div class="tl-info"><div class="t">ПРИБЫЛ</div><div class="s">13.06 · 08:52</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-done"></div><div class="tl-info"><div class="t">В РАБОТЕ</div><div class="s">13.06 · 09:00</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-done"></div><div class="tl-info"><div class="t">СНИМКИ ПОЛУЧЕНЫ · QC ОК</div><div class="s">13.06 · 09:47</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-now"></div><div class="tl-info"><div class="t" style="color:var(--accent)">ОПИСЫВАЕТСЯ ◀ сейчас</div><div class="s">13.06 · 10:05</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-wait"></div><div class="tl-info"><div class="t muted">ПОДПИСАНО</div><div class="s">—</div></div></div>
+      <div class="tl-step"><div class="tl-dot dot-wait"></div><div class="tl-info"><div class="t muted">ВЫДАНО</div><div class="s">—</div></div></div>
+    </div>
+  </div>
+</div>
+<!-- CENTER: viewer + form -->
+<div class="rpanel fcol" style="overflow:hidden">
+  <div class="vtb"><span class="muted small">Stone Web Viewer · Orthanc</span>
+    <button class="vbtn">↔ Ш/У</button><button class="vbtn">📏 Измерить</button>
+    <button class="vbtn">🔍 Zoom</button><button class="vbtn">◐ Яркость</button>
+    <button class="vbtn">⊞ Серии</button><button class="vbtn">🖥 Полный</button></div>
+  <div class="vpane">
+    <div style="font-size:32px">🧠</div>
+    <div>Study UID: 1.2.840.10008…20260613.512</div>
+    <div class="muted small">3 серии · 312 изображений · Siemens 3T MRI</div>
+    <div class="flex g6 mt8">
+      <div style="background:#222;border:1px solid #333;padding:3px 8px;font-size:10px;color:#aaa;cursor:pointer;border-radius:2px">T1 ax · 128 сл.</div>
+      <div style="background:#1a1a1a;border:1px solid #555;padding:3px 8px;font-size:10px;color:#ccc;cursor:pointer;border-radius:2px">T2 FLAIR · 32 сл.</div>
+      <div style="background:#1a1a1a;border:1px solid #333;padding:3px 8px;font-size:10px;color:#aaa;cursor:pointer;border-radius:2px">DWI · 20 сл.</div>
+    </div>
+  </div>
+  <div style="flex:1;overflow:auto;padding:12px">
+    <div class="flex ic jb mb8"><div class="fsec-title" style="margin:0">Шаблон протокола</div></div>
+    <div class="frow mb12">
+      <div class="fg" style="flex:2"><input value="МРТ головного мозга — стандартный" style="font-size:12px"></div>
+      <div class="fg"><button class="btn btn-sm" style="width:100%">Сменить шаблон</button></div>
+    </div>
+    <div class="fsec-title">Структурированные поля</div>
+    <div class="frow">
+      <div class="fg"><label>Серое вещество</label>
+        <select><option>Норма</option><option>Изменено</option><option>Атрофия</option></select></div>
+      <div class="fg"><label>Белое вещество</label>
+        <select><option selected>Очаги демиелинизации</option><option>Норма</option></select></div>
+      <div class="fg"><label>Желудочки</label>
+        <select><option>Норма</option><option>Расширены</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Контрастное накопление</label>
+        <select><option>Без контраста</option><option>Нет</option><option>Есть</option></select></div>
+      <div class="fg"><label>Размер очагов (мм)</label>
+        <input value="3–8" placeholder="н-р: 3–8"></div>
+    </div>
+    <div class="fg mb12"><label>Описание</label>
+      <textarea style="min-height:90px">В белом веществе обоих полушарий головного мозга определяются множественные очаги демиелинизации размером 3–8 мм в перивентрикулярной и субкортикальной локализации, гиперинтенсивные на T2/FLAIR. Признаки по типу «пальцев Доусона». Без признаков активного воспаления.</textarea></div>
+    <div class="fg"><label style="font-weight:700;color:var(--text)">Заключение <span class="req">*</span></label>
+      <textarea style="min-height:60px;border-color:var(--accent)">МР-картина множественного демиелинизирующего поражения головного мозга, соответствует критериям МакДональда для рассеянного склероза. Активных очагов не выявлено.</textarea></div>
+  </div>
+</div>
+<!-- RIGHT: ICD + sign -->
+<div class="rpanel">
+  <div class="rph">Диагноз и подпись</div>
+  <div class="rpb">
+    <div class="fsec-title">МКБ-10 <span class="req">*</span></div>
+    <input type="text" placeholder="Введите код или название…" style="width:100%;margin-bottom:8px;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:12px">
+    <div style="background:var(--s-new-bg);border-radius:3px;padding:4px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span><strong>G35</strong> — Рассеянный склероз</span>
+      <button class="btn btn-sm btn-d" style="padding:1px 5px">✕</button>
+    </div>
+    <button class="btn btn-sm" style="width:100%;margin-bottom:12px">+ Добавить сопутствующий</button>
+    <div class="div"></div>
+    <div class="fsec-title">Критическая находка</div>
+    <label class="flex ic g8 small mb8" style="cursor:pointer"><input type="checkbox" style="width:14px;height:14px"> Пометить как критическую</label>
+    <div class="muted small mb12">При выдаче — автоматическое cito-уведомление направителю</div>
+    <div class="div"></div>
+    <div class="fsec-title">Подпись (ЭЦП-ready)</div>
+    <div class="sigbox mb12">
+      <span style="font-size:20px">🔏</span>
+      <div><strong>Нурланов А.К.</strong><br>
+        <span>Врач-рентгенолог · Лиц. №МЗ-2024-0471</span><br>
+        <span class="muted small">13.06.2026 · 10:32 · UTC+6</span><br>
+        <code class="muted">SHA-256: a7f3c2e9…</code></div>
+    </div>
+    <div class="muted small mb12">MVP: простая ЭЦП. После MVP — НУЦ РК / NCALayer.</div>
+    <div class="fcol g6">
+      <button class="btn btn-sm">💾 Сохранить черновик</button>
+      <button class="btn btn-sm btn-ok">🔏 Подписать заключение</button>
+      <button class="btn btn-sm btn-p">📤 Выдать (PDF)</button>
+    </div>
+    <div class="div"></div>
+    <div class="fsec-title">Дополнительно</div>
+    <label class="flex ic g6 small" style="cursor:pointer"><input type="checkbox"> Запросить второе мнение</label>
+    <div class="muted small mt8">Инициирует заведующий отделением</div>
+  </div>
+</div></div>""")
+
+# ── S8: TARIFF ─────────────────────────────────────────────────────────────────
+
+s_tar = screen("s-tar","Администратор — Справочник: Тарификатор МЗ РК","s-ref",
+    ("Сатов М.О.","Администратор"),
+    phead("Тарификатор услуг","Приказ МЗ РК № ҚР ДСМ-170/2020 · ГОБМП/ОСМС",
+          '<div class="flex g8 ml-a"><button class="btn btn-sm">⬆ Импорт CSV</button><button class="btn btn-sm">⬇ Экспорт</button><button class="btn btn-sm btn-p">+ Добавить</button></div>')
+    +"""<div class="pcontent">
+<div class="sbar">
+  <div class="si"><input type="text" placeholder="Поиск по коду или названию…"></div>
+  <select class="btn btn-sm"><option>Все модальности</option><option>CT</option><option>MR</option><option>CR</option><option>US</option><option>MG</option></select>
+  <select class="btn btn-sm"><option>Все типы</option><option>ГОБМП</option><option>ОСМС</option><option>Платно</option></select>
+  <select class="btn btn-sm"><option>Актуальная версия</option><option>Все версии</option></select>
+</div>
+<div class="twrap"><table><thead><tr>
+  <th>Код ГОБМП</th><th>Код ОСМС</th><th>Наименование (RU)</th><th>Наименование (KZ)</th>
+  <th>Мод.</th><th>Тариф ГОБМП</th><th>Тариф ОСМС</th><th>Тариф платно</th>
+  <th>Длит. (мин)</th><th>С конт.</th><th>Действует с</th><th></th>
+</tr></thead><tbody>
+<tr><td><code>A06.10.001</code></td><td><code>A06.10.001-О</code></td>
+  <td>Рентгенография органов грудной клетки</td>
+  <td><span class="muted small">Кеуде қуысы мүшелерін рентгенге түсіру</span></td>
+  <td><span class="b b-pln">CR</span></td>
+  <td>1 800 ₸</td><td>2 100 ₸</td><td>3 500 ₸</td><td>15</td>
+  <td>—</td><td>01.07.2020</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">✕</button></div></td></tr>
+<tr><td><code>A06.20.001</code></td><td><code>A06.20.001-О</code></td>
+  <td>КТ головного мозга без контраста</td>
+  <td><span class="muted small">Бас миын КТ зерттеу</span></td>
+  <td><span class="b b-pln">CT</span></td>
+  <td>8 400 ₸</td><td>9 800 ₸</td><td>18 000 ₸</td><td>20</td>
+  <td>—</td><td>01.07.2020</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">✕</button></div></td></tr>
+<tr style="background:var(--accent-bg)"><td><code>A06.20.010</code></td><td><code>A06.20.010-О</code></td>
+  <td>МРТ головного мозга без контраста</td>
+  <td><span class="muted small">Бас миын МРТ зерттеу</span></td>
+  <td><span class="b b-pln">MR</span></td>
+  <td>15 200 ₸</td><td>18 200 ₸</td><td>35 000 ₸</td><td>45</td>
+  <td>—</td><td>01.07.2020</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">✕</button></div></td></tr>
+<tr><td><code>A06.20.011</code></td><td><code>A06.20.011-О</code></td>
+  <td>МРТ головного мозга с контрастом</td>
+  <td><span class="muted small">Контрастпен МРТ зерттеу</span></td>
+  <td><span class="b b-pln">MR</span></td>
+  <td>21 000 ₸</td><td>24 500 ₸</td><td>48 000 ₸</td><td>60</td>
+  <td>✓</td><td>01.07.2020</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">✕</button></div></td></tr>
+<tr><td><code>A06.21.001</code></td><td><code>A06.21.001-О</code></td>
+  <td>УЗИ органов брюшной полости</td>
+  <td><span class="muted small">Іш қуысы мүшелерін УДЗ зерттеу</span></td>
+  <td><span class="b b-pln">US</span></td>
+  <td>3 800 ₸</td><td>4 500 ₸</td><td>9 000 ₸</td><td>20</td>
+  <td>—</td><td>01.07.2020</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">✕</button></div></td></tr>
+</tbody></table></div>
+<div class="fcard"><div class="ct">Редактирование / Добавление записи</div>
+<div class="frow">
+  <div class="fg"><label>Код ГОБМП <span class="req">*</span></label><input placeholder="A06.20.010"><div class="fhint">Формат: A00.00.000</div></div>
+  <div class="fg"><label>Код ОСМС</label><input placeholder="A06.20.010-О"></div>
+  <div class="fg"><label>Модальность <span class="req">*</span></label>
+    <select><option>MR</option><option>CT</option><option>CR</option><option>US</option><option>MG</option><option>DX</option></select></div>
+</div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Наименование (RU) <span class="req">*</span></label><input placeholder="МРТ головного мозга без контраста"></div>
+  <div class="fg" style="flex:2"><label>Наименование (KZ)</label><input placeholder="Бас миын МРТ зерттеу"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Тариф ГОБМП (₸)</label><input type="number" value="15200"></div>
+  <div class="fg"><label>Тариф ОСМС (₸)</label><input type="number" value="18200"></div>
+  <div class="fg"><label>Тариф платно (₸)</label><input type="number" value="35000"></div>
+  <div class="fg"><label>Длительность (мин) <span class="req">*</span></label><input type="number" value="45"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Действует с <span class="req">*</span></label><input type="date" value="2020-07-01"></div>
+  <div class="fg"><label>Контрастное вещество</label><select><option>Нет</option><option>Опционально</option><option>Обязательно</option></select></div>
+  <div class="fg"><label>Статус</label><select><option>Активна</option><option>Архив</option></select></div>
+</div>
+<div class="faction"><button class="btn btn-p btn-sm">Сохранить</button><button class="btn btn-sm">Отмена</button></div>
+</div></div>""")
+
+# ── S9: ICD10 ──────────────────────────────────────────────────────────────────
+
+s_icd = screen("s-icd","Администратор / Врач — Справочник: МКБ-10","s-ref",
+    ("Сатов М.О.","Администратор"),
+    phead("МКБ-10","Международная классификация болезней 10-го пересмотра · Только чтение",
+          '<div class="ml-a flex g8"><span class="muted small ic flex">Загружено: 15 843 кода · версия 2023</span><button class="btn btn-sm">⬆ Обновить справочник</button></div>')
+    +"""<div class="pcontent">
+<div class="sbar">
+  <div class="si" style="flex:2"><input type="text" placeholder="Код (G35) или название (рассеянный…)" value="рассеянный"></div>
+  <select class="btn btn-sm"><option>Все классы</option><option>A–B Инфекционные</option><option>C–D Новообразования</option><option>G Нервная система</option><option>I Системы кровообращения</option><option>J Дыхательная</option><option>K Пищеварительная</option><option>M Костно-мышечная</option><option>N Мочеполовая</option><option>S–T Травмы</option></select>
+</div>
+<div class="ibox">🔍 Найдено 4 результата по запросу «рассеянный»</div>
+<div class="twrap"><table><thead><tr>
+  <th>Код</th><th>Наименование (RU)</th><th>Наименование (KZ)</th><th>Класс</th><th>Тип</th>
+</tr></thead><tbody>
+<tr style="background:var(--accent-bg)">
+  <td><code>G35</code></td><td><strong>Рассеянный склероз</strong></td>
+  <td><span class="muted">Шашыранды склероз</span></td>
+  <td>G — Болезни нервной системы</td>
+  <td><span class="tag">Код</span></td>
+</tr>
+<tr><td><code>G36</code></td><td>Другая острая диссеминированная демиелинизация</td>
+  <td><span class="muted">Басқа жедел демиелинизация</span></td>
+  <td>G — Болезни нервной системы</td><td><span class="tag">Код</span></td></tr>
+<tr><td><code>G37</code></td><td>Другие демиелинизирующие болезни ЦНС</td>
+  <td><span class="muted">ОЖЖ-нің демиелинизациясы</span></td>
+  <td>G — Болезни нервной системы</td><td><span class="tag">Блок</span></td></tr>
+<tr><td><code>G37.0</code></td><td>Диффузный склероз (Болезнь Шильдера)</td>
+  <td><span class="muted">Диффузды склероз</span></td>
+  <td>G — Болезни нервной системы</td><td><span class="tag">Код</span></td></tr>
+</tbody></table></div>
+<div class="card"><div class="ct">Часто используемые коды в радиологии</div>
+<div class="flex fwrap g6">
+  <code>G35</code><code>G43</code><code>G93.4</code><code>I21.0</code><code>I61</code><code>I63</code>
+  <code>J18.9</code><code>J45</code><code>K80.2</code><code>K85</code><code>M51.1</code><code>M54.5</code>
+  <code>C34</code><code>C50</code><code>S06</code><code>S72</code><code>R51</code>
+</div></div></div>""")
+
+# ── S10: DEVICES ───────────────────────────────────────────────────────────────
+
+s_dev = screen("s-dev","Администратор — Справочник: Аппараты","s-ref",
+    ("Сатов М.О.","Администратор"),
+    phead("Аппараты и модальности","",
+          '<button class="btn btn-sm btn-p ml-a">+ Добавить аппарат</button>')
+    +"""<div class="pcontent">
+<div class="twrap mb12"><table><thead><tr>
+  <th>Наименование</th><th>Тип</th><th>AE Title</th><th>IP:порт</th><th>Рабочие часы</th><th>Статус</th><th>Последнее исследование</th><th></th>
+</tr></thead><tbody>
+<tr><td><strong>Siemens SOMATOM Go.All</strong></td><td><span class="b b-pln">CT</span></td>
+  <td><code>CT1_SOMATOM</code></td><td><code>192.168.1.10:104</code></td>
+  <td>08:00–18:00 Пн–Пт</td><td>"""+b("ok","АКТИВЕН")+"""</td><td>13.06.2026 10:00</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm">📅</button></div></td></tr>
+<tr><td><strong>Siemens SOMATOM Definition</strong></td><td><span class="b b-pln">CT</span></td>
+  <td><code>CT2_DEF64</code></td><td><code>192.168.1.11:104</code></td>
+  <td>08:00–20:00 Пн–Сб</td><td>"""+b("ok","АКТИВЕН")+"""</td><td>13.06.2026 09:30</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm">📅</button></div></td></tr>
+<tr style="background:var(--warn-bg)"><td><strong>Philips Ingenia 3.0T</strong></td><td><span class="b b-pln">MR</span></td>
+  <td><code>MRI1_INGENIA</code></td><td><code>192.168.1.20:104</code></td>
+  <td>08:00–18:00 Пн–Пт</td><td>"""+b("ok","АКТИВЕН")+"""</td><td>13.06.2026 09:47</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm">📅</button></div></td></tr>
+<tr style="background:var(--danger-bg)"><td><strong>GE Optima MR450W</strong></td><td><span class="b b-pln">MR</span></td>
+  <td><code>MRI2_OPTIMA</code></td><td><code>192.168.1.21:104</code></td>
+  <td>08:00–18:00 Пн–Пт</td><td>"""+b("warn","ТО до 16.06")+"""</td><td>10.06.2026</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm">📅</button></div></td></tr>
+<tr><td><strong>Carestream DRX-Evolution</strong></td><td><span class="b b-pln">CR</span></td>
+  <td><code>RG1_DRXEVOL</code></td><td><code>192.168.1.30:104</code></td>
+  <td>08:00–18:00 Пн–Пт</td><td>"""+b("ok","АКТИВЕН")+"""</td><td>13.06.2026 09:30</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm">📅</button></div></td></tr>
+</tbody></table></div>
+<div class="fcard"><div class="ct">Форма аппарата</div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Наименование <span class="req">*</span></label><input placeholder="Siemens SOMATOM Go.All"></div>
+  <div class="fg"><label>Тип (модальность) <span class="req">*</span></label>
+    <select><option>CT — КТ</option><option>MR — МРТ</option><option>CR — Рентген</option><option>DX — Рентген цифр.</option><option>US — УЗИ</option><option>MG — Маммография</option><option>RF — Рентгеноскопия</option></select></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>AE Title <span class="req">*</span></label><input placeholder="CT1_SOMATOM" style="font-family:var(--mono)">
+    <div class="fhint">1–16 символов: A–Z, 0–9, пробел, подчёркивание. Уникальный в системе.</div></div>
+  <div class="fg"><label>IP-адрес</label><input placeholder="192.168.1.10" style="font-family:var(--mono)"></div>
+  <div class="fg"><label>DICOM порт</label><input value="104" style="font-family:var(--mono)"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Начало работы</label><input type="time" value="08:00"></div>
+  <div class="fg"><label>Конец работы</label><input type="time" value="18:00"></div>
+  <div class="fg"><label>Рабочие дни</label>
+    <div class="flex g4 mt8">
+      <div class="pill on">Пн</div><div class="pill on">Вт</div><div class="pill on">Ср</div>
+      <div class="pill on">Чт</div><div class="pill on">Пт</div><div class="pill">Сб</div><div class="pill">Вс</div>
+    </div></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Статус</label>
+    <select><option>Активен</option><option>ТО (плановое)</option><option>Поломка</option><option>Выведен из работы</option></select></div>
+  <div class="fg" style="flex:2"><label>Комментарий</label><input placeholder="Примечание для персонала"></div>
+</div>
+<div class="faction"><button class="btn btn-p btn-sm">Сохранить</button><button class="btn btn-sm">Проверить DICOM-соединение</button><button class="btn btn-sm">Отмена</button></div>
+</div></div>""")
+
+# ── S11: TEMPLATES ─────────────────────────────────────────────────────────────
+
+s_tpl = screen("s-tpl","Администратор — Справочник: Шаблоны протоколов","s-ref",
+    ("Сатов М.О.","Администратор"),
+    phead("Шаблоны протоколов","",
+          '<button class="btn btn-sm btn-p ml-a">+ Новый шаблон</button>')
+    +"""<div class="pcontent"><div class="sl">
+<div>
+  <div class="fstrip mb8">
+    <select><option>Все модальности</option><option>MR</option><option>CT</option><option>CR</option><option>US</option></select>
+    <select><option>Активные</option><option>Все</option></select>
+  </div>
+  <div class="twrap"><table><thead><tr><th>Шаблон</th><th>Мод.</th><th>Версия</th><th>Услуга</th><th></th></tr></thead><tbody>
+  <tr style="background:var(--accent-bg)"><td><strong>МРТ головного мозга — стандартный</strong></td><td><span class="b b-pln">MR</span></td><td>v3</td><td>A06.20.010</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>МРТ головного мозга — с контрастом</td><td><span class="b b-pln">MR</span></td><td>v2</td><td>A06.20.011</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>МРТ позвоночника поясничного</td><td><span class="b b-pln">MR</span></td><td>v4</td><td>A06.20.030</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>КТ органов грудной клетки</td><td><span class="b b-pln">CT</span></td><td>v2</td><td>A06.20.002</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>КТ головного мозга без контраста</td><td><span class="b b-pln">CT</span></td><td>v3</td><td>A06.20.001</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>Рентген грудной клетки (2 проекции)</td><td><span class="b b-pln">CR</span></td><td>v1</td><td>A06.10.001</td><td><button class="btn btn-sm">✏</button></td></tr>
+  <tr><td>УЗИ органов брюшной полости</td><td><span class="b b-pln">US</span></td><td>v2</td><td>A06.21.001</td><td><button class="btn btn-sm">✏</button></td></tr>
+  </tbody></table></div>
+</div>
+<div class="fcard"><div class="ct">МРТ головного мозга — стандартный · v3</div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Наименование (RU) <span class="req">*</span></label><input value="МРТ головного мозга — стандартный"></div>
+  <div class="fg"><label>Наименование (KZ)</label><input value="Бас миын МРТ — стандартты"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Модальность <span class="req">*</span></label><select><option>MR — МРТ</option></select></div>
+  <div class="fg"><label>Область</label><input value="Головной мозг"></div>
+  <div class="fg"><label>Привязка к услуге</label><input value="A06.20.010"></div>
+</div>
+<div class="fsec-title mt8">Структурированные поля шаблона</div>
+<div class="twrap mb8"><table><thead><tr><th>#</th><th>Метка</th><th>Тип поля</th><th>Варианты / Ед. изм.</th><th>Обяз.</th><th></th></tr></thead><tbody>
+<tr><td>1</td><td>Серое вещество</td><td>select</td><td>Норма / Изменено / Атрофия</td><td>—</td><td><button class="btn btn-sm">✕</button></td></tr>
+<tr><td>2</td><td>Белое вещество</td><td>select</td><td>Норма / Очаги демиелинизации / Диффузные изм.</td><td>—</td><td><button class="btn btn-sm">✕</button></td></tr>
+<tr><td>3</td><td>Желудочковая система</td><td>radio</td><td>Норма / Расширена</td><td>—</td><td><button class="btn btn-sm">✕</button></td></tr>
+<tr><td>4</td><td>Размер очагов (мм)</td><td>text</td><td>мм</td><td>—</td><td><button class="btn btn-sm">✕</button></td></tr>
+<tr><td>5</td><td>Контрастное накопление</td><td>radio</td><td>Нет / Есть / Без контраста</td><td>—</td><td><button class="btn btn-sm">✕</button></td></tr>
+</tbody></table></div>
+<button class="btn btn-sm mb8">+ Добавить поле</button>
+<div class="frow">
+  <div class="fg"><label>Текст шаблона описания</label>
+    <textarea style="min-height:70px">В белом веществе [__] полушарий определяются [_] очаги [_] размером [_] мм в [_] локализации...</textarea></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Текст шаблона заключения</label>
+    <textarea style="min-height:50px">МР-картина [патология]. Рекомендуется консультация невролога.</textarea></div>
+</div>
+<div class="faction"><button class="btn btn-p btn-sm">Сохранить как v4</button><button class="btn btn-sm">Предпросмотр</button><button class="btn btn-sm">Отмена</button></div>
+</div></div></div>""")
+
+# ── S12: USERS ─────────────────────────────────────────────────────────────────
+
+s_usr = screen("s-usr","Администратор — Справочник: Пользователи","s-ref",
+    ("Сатов М.О.","Администратор"),
+    phead("Пользователи и роли","",
+          '<button class="btn btn-sm btn-p ml-a">+ Новый пользователь</button>')
+    +"""<div class="pcontent">
+<div class="sbar">
+  <div class="si"><input placeholder="Поиск по ФИО или логину…"></div>
+  <select class="btn btn-sm"><option>Все роли</option><option>Регистратор</option><option>Лаборант</option><option>Врач-рентгенолог</option><option>Заведующий</option><option>Врач-направитель</option><option>Администратор</option></select>
+  <select class="btn btn-sm"><option>Активные</option><option>Все</option><option>Заблокированные</option></select>
+</div>
+<div class="twrap mb12"><table><thead><tr>
+  <th></th><th>ФИО / Логин</th><th>Роль</th><th>Аппарат по умолч.</th><th>Email</th><th>Последний вход</th><th>Статус</th><th></th>
+</tr></thead><tbody>
+<tr><td><div class="avatar">НА</div></td>
+  <td><strong>Нурланов Асет Кайратович</strong><br><code class="muted small">nurlanov.a</code></td>
+  <td><span class="b-role">Врач-рентгенолог</span></td><td>—</td>
+  <td>nurlanov@ris.kz</td><td>13.06.2026 08:50</td>
+  <td>"""+b("ok","АКТИВЕН")+"""</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">Блок.</button></div></td></tr>
+<tr><td><div class="avatar">АД</div></td>
+  <td><strong>Алиева Дина Мухтаровна</strong><br><code class="muted small">alieva.d</code></td>
+  <td><span class="b-role">Регистратор</span></td><td>—</td>
+  <td>alieva@ris.kz</td><td>13.06.2026 08:00</td>
+  <td>"""+b("ok","АКТИВЕН")+"""</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">Блок.</button></div></td></tr>
+<tr><td><div class="avatar">СТ</div></td>
+  <td><strong>Сериков Тимур Болатович</strong><br><code class="muted small">serikov.t</code></td>
+  <td><span class="b-role">Лаборант</span></td><td>МРТ-1</td>
+  <td>serikov@ris.kz</td><td>13.06.2026 07:55</td>
+  <td>"""+b("ok","АКТИВЕН")+"""</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-d">Блок.</button></div></td></tr>
+<tr style="background:var(--danger-bg)"><td><div class="avatar" style="background:var(--danger-bg);color:var(--danger)">ОС</div></td>
+  <td><strong>Овчинников Сергей И.</strong><br><code class="muted small">ovchinnikov.s</code></td>
+  <td><span class="b-role">Врач-рентгенолог</span></td><td>—</td>
+  <td>ovchinnikov@ris.kz</td><td>01.03.2026</td>
+  <td>"""+b("can","ЗАБЛОКИРОВАН")+"""</td>
+  <td><div class="flex g4"><button class="btn btn-sm">✏</button><button class="btn btn-sm btn-ok">Разблок.</button></div></td></tr>
+</tbody></table></div>
+<div class="fcard"><div class="ct">Форма пользователя</div>
+<div class="frow">
+  <div class="fg"><label>Логин <span class="req">*</span></label><input placeholder="ivan.petrov"><div class="fhint">Только латиница, цифры, точка. Уникальный.</div></div>
+  <div class="fg"><label>Пароль <span class="req">*</span></label><input type="password" placeholder="Мин. 8 символов"><div class="fhint">Заглавная + строчная + цифра</div></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Фамилия <span class="req">*</span></label><input placeholder="Нурланов"></div>
+  <div class="fg"><label>Имя <span class="req">*</span></label><input placeholder="Асет"></div>
+  <div class="fg"><label>Отчество</label><input placeholder="Кайратович"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Роль <span class="req">*</span></label>
+    <select><option>— Выберите роль —</option><option>Регистратор</option><option>Лаборант</option><option>Врач-рентгенолог</option><option>Заведующий отделением</option><option>Врач-направитель</option><option>Администратор</option></select></div>
+  <div class="fg"><label>Специализация / должность</label><input placeholder="Врач-рентгенолог, КТ/МРТ"><div class="fhint">Выводится в PDF-заключении</div></div>
+  <div class="fg"><label>№ лицензии МЗ РК</label><input placeholder="МЗ-2024-0471" style="font-family:var(--mono)"></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Email</label><input type="email" placeholder="nurlanov@clinic.kz"></div>
+  <div class="fg"><label>Телефон</label><input placeholder="+7 (701) 234-56-78"><div class="fhint">Задел под 2FA / SMS</div></div>
+  <div class="fg"><label>Аппарат по умолчанию</label>
+    <select><option>— Не назначен —</option><option>МРТ-1</option><option>МРТ-2</option><option>КТ-1</option><option>КТ-2</option><option>РГ-1</option></select>
+    <div class="fhint">Только для роли Лаборант</div></div>
+</div>
+<div class="frow">
+  <div class="fg"><label>Статус</label>
+    <div class="flex g6 mt8"><div class="pill on">Активен</div><div class="pill">Заблокирован</div></div></div>
+</div>
+<div class="faction"><button class="btn btn-p btn-sm">Сохранить</button><button class="btn btn-sm">Сбросить пароль</button><button class="btn btn-sm">Журнал входов</button><button class="btn btn-sm">Отмена</button></div>
+</div></div>""")
+
+# ── S13: UNMATCHED ─────────────────────────────────────────────────────────────
+
+s_unm = screen("s-unm","Администратор / Лаборант — Несопоставленные студии","s-unm",
+    ("Сатов М.О.","Администратор"),
+    phead("Несопоставленные студии","Студии Orthanc без соответствующего заказа в RIS",
+          '<div class="ml-a flex g8"><button class="btn btn-sm">🔄 Обновить</button></div>')
+    +"""<div class="pcontent">
+<div class="wbox">⚠ 2 студии не были автоматически сопоставлены с заказами. Требуется ручное связывание или создание нового заказа.</div>
+<div class="twrap mb12"><table><thead><tr>
+  <th>Дата/Время (Orthanc)</th><th>Пациент (DICOM-теги)</th><th>Модальность</th>
+  <th>Study Description</th><th>Accession # (из DICOM)</th><th>Серий</th><th>Действия</th>
+</tr></thead><tbody>
+<tr style="background:var(--warn-bg)">
+  <td><strong>13.06.2026 09:15</strong></td>
+  <td><strong>AKHMETOV^RUSLAN</strong><br><code class="small">ID: 710509300147</code></td>
+  <td><span class="b b-pln">CT</span></td>
+  <td>CT ABD W CONTRAST</td>
+  <td><code>260613-00501</code> <span class="muted small">(не найден)</span></td>
+  <td>3 серии · 512 сн.</td>
+  <td><div class="flex g4">
+    <button class="btn btn-sm btn-p">Связать с заказом</button>
+    <button class="btn btn-sm">Создать заказ</button>
+    <button class="btn btn-sm btn-d">Игнорировать</button>
+  </div></td>
+</tr>
+<tr style="background:var(--warn-bg)">
+  <td><strong>13.06.2026 11:02</strong></td>
+  <td><strong>UNKNOWN^PATIENT</strong><br><code class="small">ID: ?</code></td>
+  <td><span class="b b-pln">MR</span></td>
+  <td>MRI BRAIN WO</td>
+  <td><code></code> <span class="muted small">(пустой AN)</span></td>
+  <td>4 серии · 384 сн.</td>
+  <td><div class="flex g4">
+    <button class="btn btn-sm btn-p">Связать с заказом</button>
+    <button class="btn btn-sm">Создать заказ</button>
+    <button class="btn btn-sm btn-d">Игнорировать</button>
+  </div></td>
+</tr>
+</tbody></table></div>
+<div class="fcard"><div class="ct">Ручное связывание — «AKHMETOV^RUSLAN» · CT · 13.06.2026 09:15</div>
+<div class="ibox mb12">Система нашла возможные совпадения по ФИО и дате:</div>
+<div class="twrap mb12"><table><thead><tr><th>Заказ AN</th><th>Пациент RIS</th><th>Услуга</th><th>Дата записи</th><th>Статус</th><th></th></tr></thead><tbody>
+<tr style="background:var(--accent-bg)">
+  <td><code>260613-00498</code></td>
+  <td><strong>Ахметов Руслан Кайратович</strong><br><code class="small">ИИН 710509300147</code></td>
+  <td>КТ брюшной полости с контрастом</td>
+  <td>13.06.2026 09:00</td>
+  <td>"""+bs("prg")+"""</td>
+  <td><button class="btn btn-sm btn-p">Связать этот заказ</button></td>
+</tr>
+</tbody></table></div>
+<div class="frow">
+  <div class="fg" style="flex:2"><label>Или найти заказ вручную (AN или ФИО)</label>
+    <input placeholder="Введите AN или ФИО пациента…"></div>
+  <div class="fg"><label>&nbsp;</label><button class="btn btn-sm" style="margin-top:2px">Найти</button></div>
+</div>
+<div class="faction"><button class="btn btn-p btn-sm">✓ Подтвердить связывание</button><button class="btn btn-sm">Отмена</button></div>
+</div></div>""")
+
+# ── ASSEMBLE ───────────────────────────────────────────────────────────────────
+
+TOPNAV = """<div id="topbar">
+  <span class="lbl">RIS MVP:</span>
+  <button class="tnav active" id="tn-s-dash" onclick="go('s-dash')">Дашборд</button>
+  <button class="tnav" id="tn-s-pts" onclick="go('s-pts')">Пациенты</button>
+  <button class="tnav" id="tn-s-pcard" onclick="go('s-pcard')">Карточка</button>
+  <button class="tnav" id="tn-s-ord" onclick="go('s-ord')">Направление</button>
+  <button class="tnav" id="tn-s-cal" onclick="go('s-cal')">Расписание</button>
+  <button class="tnav" id="tn-s-wl" onclick="go('s-wl')">Worklist</button>
+  <button class="tnav" id="tn-s-rep" onclick="go('s-rep')">Описание</button>
+  <div class="sep"></div>
+  <span class="lbl">Справочники:</span>
+  <button class="tnav" id="tn-s-tar" onclick="go('s-tar')">Тарификатор</button>
+  <button class="tnav" id="tn-s-icd" onclick="go('s-icd')">МКБ-10</button>
+  <button class="tnav" id="tn-s-dev" onclick="go('s-dev')">Аппараты</button>
+  <button class="tnav" id="tn-s-tpl" onclick="go('s-tpl')">Шаблоны</button>
+  <button class="tnav" id="tn-s-usr" onclick="go('s-usr')">Пользователи</button>
+  <div class="sep"></div>
+  <button class="tnav" id="tn-s-unm" onclick="go('s-unm')">⚠ Несопост. (2)</button>
+  <button id="theme-btn" onclick="toggleTheme()">🌙 Тёмная</button>
+</div>"""
+
+JS = """<script>
+const screens=['s-dash','s-pts','s-pcard','s-ord','s-cal','s-wl','s-rep','s-tar','s-icd','s-dev','s-tpl','s-usr','s-unm'];
+function go(id){
+  screens.forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.classList.toggle('on',s===id);
+    const btn=document.getElementById('tn-'+s);
+    if(btn) btn.classList.toggle('active',s===id);
+  });
+  window.scrollTo(0,0);
+}
+function toggleTheme(){
+  const html=document.documentElement;
+  const btn=document.getElementById('theme-btn');
+  const dark=html.getAttribute('data-theme')==='dark';
+  /* spin animation on button */
+  btn.classList.remove('spin');
+  void btn.offsetWidth; /* reflow to restart animation */
+  btn.classList.add('spin');
+  /* add transition class, apply theme, remove class after transition */
+  html.classList.add('switching');
+  setTimeout(()=>html.classList.remove('switching'),400);
+  html.setAttribute('data-theme',dark?'light':'dark');
+  btn.innerHTML=dark?'<span style="font-size:14px">🌙</span> Тёмная':'<span style="font-size:14px">☀️</span> Светлая';
+  localStorage.setItem('ris-theme',dark?'light':'dark');
+}
+(function(){
+  const t=localStorage.getItem('ris-theme')||'light';
+  const btn=document.getElementById('theme-btn');
+  if(t==='dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    btn.innerHTML='<span style="font-size:14px">☀️</span> Светлая';
+  } else {
+    btn.innerHTML='<span style="font-size:14px">🌙</span> Тёмная';
+  }
+})();
+</script>"""
+
+HTML = f"""<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RIS MVP — Wireframes v2</title>
+<style>{CSS}</style></head>
+<body>
+{TOPNAV}
+{s_dash}{s_pts}{s_pcard}{s_ord}{s_cal}{s_wl}{s_rep}
+{s_tar}{s_icd}{s_dev}{s_tpl}{s_usr}{s_unm}
+{JS}
+</body></html>"""
+
+with open('wireframes.html','w',encoding='utf-8') as f:
+    f.write(HTML)
+print(f'Done: {len(HTML):,} bytes')

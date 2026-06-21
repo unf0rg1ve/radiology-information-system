@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ris-db
+    environment:
+      POSTGRES_USER: ris
+      POSTGRES_PASSWORD: ris
+      POSTGRES_DB: ris
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ris -d ris"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: ris-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ris:ris@db:5432/ris
+      TEST_DATABASE_URL: postgresql+asyncpg://ris:ris@db:5432/ris_test
+      # Используем host.docker.internal:8043 → Python proxy на хосте → 127.0.0.1:8042 → нативный Orthanc
+      ORTHANC_URL: http://host.docker.internal:8043
+      ORTHANC_EXTERNAL_URL: http://${HOST_IP}:3000
+      ORTHANC_USER: orthanc
+      ORTHANC_PASSWORD: orthanc
+      SECRET_KEY: ${SECRET_KEY:-ris-mvp-secret-key-change-in-production-2026}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-ris-orthanc-webhook-secret}
+      CORS_ORIGINS: '["http://${HOST_IP}:3000", "http://localhost:3000", "http://localhost:5173", "http://frontend:3000"]'
+      ENVIRONMENT: development
+      DEBUG: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./docs:/docs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "alembic upgrade head && python scripts/seed_refs.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build: ./frontend
+    container_name: ris-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_data:
