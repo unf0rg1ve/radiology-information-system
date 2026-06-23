@@ -53,7 +53,7 @@ export const ReportEditPage: React.FC = () => {
   const searchRef = useRef('');
 
   const currentOrderId = Form.useWatch('order_id', form);
-  const readonly = !!report && (report.status !== 'DRAFT' || isAdmin);
+  const readonly = !!report && report.status !== 'DRAFT';
   const currentTemplate = useMemo(
     () => templates.find((tpl: any) => tpl.id === selectedTemplateId),
     [templates, selectedTemplateId],
@@ -114,12 +114,6 @@ export const ReportEditPage: React.FC = () => {
   const loadInitial = async () => {
     setLoading(true);
     try {
-      if (!reportId && isAdmin) {
-        message.info('Администратор может только просматривать заключения');
-        navigate('/reports', { replace: true });
-        return;
-      }
-
       const icdRes = await refsApi.icd10({ limit: 100 });
       setIcd10(icdRes.data || []);
 
